@@ -546,13 +546,20 @@ Section 3~5 = 데이터 건수 따라 행 가변. 각 Section 시작 행 = **이
 ### 11.3. 원칙
 
 * **원본-파생**: PDF 는 파생물. 수정은 항상 원본(HTML/시트) → 재출력. PDF 직접 수정 금지.
-* **생성 방법 (표준)**: `Desktop\QA\Report\` 에 **HTML 작성 → `html_to_pdf.ps1` (headless Edge)**. Google Sheets export 방식은 품질 낮아 사용 금지.
-  - HTML 스타일 원형: `10.1th_Hotfix_QA_Report_2026-06-29.html` (title bar `#2C3E50` / h2 `#34495E` / verdict pill / `.flag` Known Issue 박스 / `.foot`)
-  - Verdict pill 색: PASS `#34A853` / CONDITIONAL PASS `#FFC107` / FAIL `#D11A1A`
-  - 통합(Result) 리포트 예: `10.5th_QA_Report_2026-07-03.html` — 섹션: Opinion / TC Result / Defect / Verification / Release Version / (부속 데이터) / Known Issue & Recommendation
+* **생성 방법 (표준)**: 팀 리포트 폴더에 **HTML 작성 → headless 브라우저 인쇄 스크립트**. Google Sheets export 방식은 품질 낮아 사용 금지.
+  - ⚠️ **인쇄 스크립트에 파일명을 반드시 인자로 준다.** 인자 없이 돌면 폴더 전체가 재렌더된다.
+  - 통합(Result) 리포트 섹션 구성: Opinion / TC Result / Defect / Verification / Release Version / (부속 데이터) / Known Issue & Recommendation
   - 데이터 정합: 수치·Verdict 는 QA Result 시트 탭과 일치시킬 것 (시트 = 데이터 원본, HTML = 발행본)
-* **보관**: `Desktop\QA\Report\` + 사내 저장소만. 외부 호스팅 금지 (고객 데이터 민감성 정책과 일관).
-* 발송 전 숫자·버전·날짜 최종 검수 1회.
+* **스타일 (2026-08-21 규약 변경)**: HTML 에 `<style>` 를 새로 짜지 않는다. 공용 CSS
+  [`assets/report.css`](./assets/report.css) 한 벌을 링크하고 **클래스만** 쓴다.
+  발행 전 **디자이너 세션 검토**를 거친다 — 규약 상세 [`REPORT_STYLE_POLICY.md`](./REPORT_STYLE_POLICY.md).
+  > 이전 판은 특정 산출물 파일(`10.1th_Hotfix_...html`)을 "스타일 원형"으로 지목했다.
+  > 산출물이 스타일 원본을 겸하면 그 파일을 고칠 때마다 규격이 조용히 바뀐다. 폐기.
+* ⚠️ **발행 전 글리프 감사 (필수)**: headless 브라우저 인쇄에서 `−`(U+2212) 등 일부 문자가
+  PDF 에서 **소실**된다. `−` 는 ASCII 하이픈과 육안 구분이 안 돼 아래 "최종 검수"로 못 잡는다.
+  절차는 [`VERIFICATION_GUIDE.md`](./VERIFICATION_GUIDE.md) §4.
+* **보관**: 팀 리포트 폴더 + 사내 저장소만. 외부 호스팅 금지 (고객 데이터 민감성 정책과 일관).
+* 발송 전 숫자·버전·날짜 최종 검수 1회. **(육안 검수는 글리프 소실을 못 잡는다 — 위 항목 별도 수행)**
 
 ---
 

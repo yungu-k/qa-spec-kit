@@ -6,30 +6,46 @@ Hotfix / 소규모 배포건 검증 완료 보고용 **간단 PDF** 리포트 �
 
 ---
 
+## 0. 스타일 규약 (2026-08-21 확정)
+
+**이 템플릿을 쓰는 세션은 내용만 쓴다. 스타일은 짜지 않는다.**
+스타일의 원본은 [`assets/report.css`](./assets/report.css) 한 벌이고,
+리포트 HTML 은 **클래스만** 쓴다. `<style>` 신설 · 인라인 `style=` · 임의 hex **금지.**
+
+발행 전 **디자이너 세션 검토 + 글리프 감사**를 거친다. 규약 상세는
+[`REPORT_STYLE_POLICY.md`](./REPORT_STYLE_POLICY.md), 역할 경계는
+[`SESSION_ROLES.md`](./SESSION_ROLES.md) §5.
+
+---
+
 ## 1. 작성 규칙 (QA_REPORT.md 준수)
 
 * **언어:** 헤더/라벨 = 영문, 내용(QA Opinion, 검증 항목) = 한국어
 * **Verdict:** 전체 대문자 — `PASS` / `CONDITIONAL PASS` / `FAIL` / `ON HOLD`
-* **검증 항목:** 콤마 나열 금지 → 번호 목록 + 마지막 줄 `— N건 전체 Pass/N/A` 요약
+* **검증 항목:** 콤마 나열 금지 → 번호 목록 + 마지막 줄 `— N건 전체 PASS/N/A` 요약
 * **사실 기반:** 실제 검증 결과만 기술. 유추/허위 금지.
-* **강조색:** 치명/구조적 리스크 문구 = Red(`#D11A1A`) inline 표기 가능.
+* **강조:** 치명/구조적 리스크 문구는 `class="red"`. **색을 직접 쓰지 않는다.**
 
-### Verdict → 배지 색상 (QA_REPORT §9.3)
+### Verdict → 배지 클래스
 
-| Verdict | 색상 |
+| Verdict | 클래스 |
 | :--- | :--- |
-| `PASS` | `#34A853` |
-| `CONDITIONAL PASS` | `#FFC107` |
-| `FAIL` | `#D11A1A` |
-| `ON HOLD` | `#999999` |
+| `PASS` | `verdict pass` |
+| `CONDITIONAL PASS` | `verdict cond-pass` |
+| `FAIL` | `verdict fail` |
+| `ON HOLD` | `verdict on-hold` |
 
-### Result 셀 색상 (Verification Details)
+### Result 셀 클래스 (Verification Details)
 
-| 값 | 색상 |
+| 값 | 클래스 |
 | :--- | :--- |
-| `PASS` | `#1E8449` |
-| `FAIL` | `#CD1C1C` |
-| `N/A` | `#7F8C8D` |
+| `PASS` | `res-pass` |
+| `FAIL` | `res-fail` |
+| `N/A` | `res-na` |
+| `N/T` (현 시점 검증 불가) | `res-nt` |
+
+> 색 값은 전부 `assets/report.css` 안에 있다. **여기에 hex 를 다시 적지 않는다** —
+> 두 군데 적히는 순간 어느 쪽이 원본인지 알 수 없게 된다.
 
 ---
 
@@ -44,37 +60,15 @@ Hotfix / 소규모 배포건 검증 완료 보고용 **간단 PDF** 리포트 �
 ## 3. HTML 템플릿
 
 > `{{PLACEHOLDER}}` 치환 후 PDF 변환. Verification 행 / Decision 블록은 건수 따라 복제·삭제.
+> **`<style>` 블록이 없는 게 정상이다** — 스타일은 `assets/report.css` 한 벌뿐(§0).
+> HTML 을 리포트 폴더에 두면 `href` 의 상대 경로를 그 위치에 맞게 조정한다.
 
 ```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<style>
-  @page { size: A4; margin: 18mm 16mm; }
-  * { box-sizing: border-box; }
-  body { font-family: "IBM Plex Sans", "Malgun Gothic", "맑은 고딕", sans-serif; color: #1c2833; font-size: 10.5pt; line-height: 1.5; margin: 0; }
-  .title { background: #2C3E50; color: #fff; padding: 14px 18px; font-size: 16pt; font-weight: 700; border-radius: 4px; }
-  .subtitle { color: #5D6D7E; font-size: 9.5pt; margin: 6px 2px 18px; }
-  h2 { background: #34495E; color: #fff; font-size: 11pt; font-weight: 700; padding: 7px 12px; margin: 22px 0 0; border-radius: 3px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 0; }
-  th, td { border: 1px solid #B3B3B3; padding: 7px 9px; vertical-align: top; }
-  th { background: #EAECEE; font-weight: 700; font-size: 9.5pt; }
-  td { font-size: 10pt; }
-  .meta th { width: 18%; text-align: left; }
-  .meta td { width: 32%; }
-  .verdict { display: inline-block; padding: 3px 12px; border-radius: 3px; color: #fff; font-weight: 700; background: {{VERDICT_COLOR}}; }
-  .area { width: 22%; background: #F7F8F9; font-weight: 700; }
-  .res-pass { color: #1E8449; font-weight: 700; text-align: center; }
-  .res-fail { color: #CD1C1C; font-weight: 700; text-align: center; }
-  .res-na { color: #7F8C8D; font-weight: 700; text-align: center; }
-  ol { margin: 0 0 0 16px; padding: 0; }
-  ol li { margin: 2px 0; }
-  .flag { background: #FEF9E7; border-left: 4px solid #F1C40F; padding: 10px 14px; margin-top: 4px; font-size: 10pt; }
-  .flag b { color: #B9770E; }
-  .red { color: #D11A1A; }
-  .foot { margin-top: 24px; color: #95A5A6; font-size: 8.5pt; text-align: right; }
-</style>
+<link rel="stylesheet" href="assets/report.css">
 </head>
 <body>
   <div class="title">{{REPORT_TITLE}}</div>
@@ -82,7 +76,7 @@ Hotfix / 소규모 배포건 검증 완료 보고용 **간단 PDF** 리포트 �
 
   <h2>1. QA Opinion</h2>
   <table class="meta">
-    <tr><th>Verdict</th><td><span class="verdict">{{VERDICT}}</span></td><th>Date</th><td>{{DATE}}</td></tr>
+    <tr><th>Verdict</th><td><span class="verdict {{VERDICT_CLASS}}">{{VERDICT}}</span></td><th>Date</th><td>{{DATE}}</td></tr>
     <tr><th>QA Lead</th><td>{{QA_LEAD}}</td><th>Epic</th><td>{{EPIC}}</td></tr>
   </table>
   <table><tr><td>{{QA_OPINION}}</td></tr></table>
@@ -100,7 +94,7 @@ Hotfix / 소규모 배포건 검증 완료 보고용 **간단 PDF** 리포트 �
         </ol>
         — {{ITEM_SUMMARY}}
       </td>
-      <td class="res-pass">{{RESULT}}</td>  <!-- class: res-pass / res-fail / res-na -->
+      <td class="res-pass">{{RESULT}}</td>  <!-- class: res-pass / res-fail / res-na / res-nt -->
     </tr>
   </table>
 
@@ -124,9 +118,11 @@ Hotfix / 소규모 배포건 검증 완료 보고용 **간단 PDF** 리포트 �
 > 별도 PDF 라이브러리 불필요. Win11 기본 Edge 사용. 외부 호스팅 안 함 → 리포트 호스팅 정책 부합.
 
 ```powershell
+param([string]$File)          # ⚠️ 인자 필수 — 아래 경고 참조
+
 $edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-$html = "<작성한 .html 경로>"
-$out  = "C:\Users\공윤구\Desktop\QA\Report\<리포트명>.pdf"
+$html = $File
+$out  = [IO.Path]::ChangeExtension($html, ".pdf")
 $url  = "file:///" + ($html -replace '\\','/')
 Start-Process -FilePath $edge -ArgumentList @(
   "--headless","--disable-gpu","--no-pdf-header-footer",
@@ -136,6 +132,21 @@ Start-Process -FilePath $edge -ArgumentList @(
 
 * `--no-pdf-header-footer` = 페이지 상하단 URL/날짜 자동 삽입 제거.
 * 한글 폰트 = `Malgun Gothic` fallback 내장(IBM Plex Sans 미설치여도 정상).
+* ⚠️ **파일명을 반드시 인자로 준다.** 인자를 안 받거나 기본값으로 폴더를 훑는 형태로 만들면
+  **폴더 전체가 재렌더**된다. 실제로 남의 산출물까지 덮어쓴 사고가 있었다.
+
+### ⚠️ 발행 전 글리프 감사 (필수)
+
+**브라우저 headless 인쇄 파이프라인에서는 폰트에 없는 문자가 조용히 사라진다.**
+실측: `−`(U+2212) · `⚡`(U+26A1) · `✓`(U+2713) 는 **PDF 에서 소실**,
+`→ ÷ ↳ ※ ① ② ⟳ ✗ — ↑ ↔` 는 정상. **`✗`(U+2717)는 살고 `✓`(U+2713)는 죽는다** —
+짐작으로 고를 수 없다.
+
+`−` 는 **ASCII 하이픈과 육안 구분이 안 돼** 검수로는 절대 못 잡는다.
+아래 §5 의 "발송 전 최종 검수" 로도 안 걸린다.
+
+→ **소스 HTML + 산출 PDF 두 층위를 다 감사한다.** 절차·self-test·엔티티 우회 함정은
+[`VERIFICATION_GUIDE.md`](./VERIFICATION_GUIDE.md) §4.
 
 ### 파일 네이밍 룰 (고정)
 
@@ -145,7 +156,7 @@ Start-Process -FilePath $edge -ArgumentList @(
 
 * 예: `10.1th_Hotfix_QA_Report_2026-06-29.pdf`
 * `{버전}` = 배포 차수(Version 페이지 표기, 예 `10.1th`). `{YYYY-MM-DD}` = 검증 완료일.
-* 저장 위치: `C:\Users\공윤구\Desktop\QA\Report\`
+* 저장 위치: 팀 리포트 폴더 (사내 저장소·공유 드라이브). **외부 호스팅 금지** — `QA_REPORT.md` §11.3
 
 ---
 
@@ -195,7 +206,7 @@ Start-Process -FilePath $edge -ArgumentList @(
 ```
 제목: [QA] 10.1th Hotfix 검증 완료 — CONDITIONAL PASS
 
-안녕하세요, QA 공윤구입니다.
+안녕하세요, QA {작성자}입니다.
 10.1th Hotfix 검증 완료되어 결과 공유드립니다.
 
 ■ 판정: CONDITIONAL PASS

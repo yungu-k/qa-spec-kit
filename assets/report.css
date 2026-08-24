@@ -1,0 +1,87 @@
+/* ============================================================
+   QA Report — 공용 스타일 (A4 인쇄 전용)
+   규약: REPORT_STYLE_POLICY.md
+   ------------------------------------------------------------
+   이 파일이 리포트 스타일의 유일한 원본이다.
+   - 리포트 HTML 은 클래스만 쓴다. 인라인 style= 금지.
+   - 컴포넌트가 부족하면 여기에 추가한다. 리포트 쪽에서 때우지 않는다.
+   - 팔레트를 바꾸면 대비/색약 검증기를 반드시 재실행한다.
+   ============================================================ */
+
+@page { size: A4; margin: 18mm 16mm; }
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "IBM Plex Sans", "Malgun Gothic", "맑은 고딕", sans-serif;
+  color: #1c2833;
+  font-size: 10.5pt;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ---------- 문서 머리 ---------- */
+.title {
+  background: #2C3E50; color: #fff;
+  padding: 14px 18px;
+  font-size: 16pt; font-weight: 700;
+  border-radius: 4px;
+}
+.subtitle { color: #5D6D7E; font-size: 9.5pt; margin: 6px 2px 18px; }
+
+h2 {
+  background: #34495E; color: #fff;
+  font-size: 11pt; font-weight: 700;
+  padding: 7px 12px; margin: 22px 0 0;
+  border-radius: 3px;
+}
+
+/* ---------- 표 ---------- */
+table { width: 100%; border-collapse: collapse; margin-top: 0; }
+th, td { border: 1px solid #B3B3B3; padding: 7px 9px; vertical-align: top; }
+th { background: #EAECEE; font-weight: 700; font-size: 9.5pt; }
+td { font-size: 10pt; }
+
+.meta th { width: 18%; text-align: left; }
+.meta td { width: 32%; }
+
+.area { width: 22%; background: #F7F8F9; font-weight: 700; }
+
+/* ---------- 판정 배지 ----------
+   Verdict 별 색은 modifier 클래스로 고른다.
+   내용 세션이 hex 를 직접 쓰지 않게 하기 위한 것. */
+.verdict {
+  display: inline-block;
+  padding: 3px 12px; border-radius: 3px;
+  color: #fff; font-weight: 700;
+  background: #999999;              /* 기본 = ON HOLD */
+}
+.verdict.pass       { background: #34A853; }
+.verdict.cond-pass  { background: #FFC107; color: #4A3B00; }
+.verdict.fail       { background: #D11A1A; }
+.verdict.on-hold    { background: #999999; }
+
+/* ---------- 결과 셀 ---------- */
+.res-pass { color: #1E8449; font-weight: 700; text-align: center; }
+.res-fail { color: #CD1C1C; font-weight: 700; text-align: center; }
+.res-na   { color: #7F8C8D; font-weight: 700; text-align: center; }
+.res-nt   { color: #7F8C8D; font-weight: 700; text-align: center; }
+
+/* ---------- 목록 ---------- */
+ol { margin: 0 0 0 16px; padding: 0; }
+ol li { margin: 2px 0; }
+
+/* ---------- 경고 / 결정 요청 블록 ---------- */
+.flag {
+  background: #FEF9E7;
+  border-left: 4px solid #F1C40F;
+  padding: 10px 14px; margin-top: 4px;
+  font-size: 10pt;
+}
+.flag b { color: #B9770E; }
+
+/* ---------- 강조 ---------- */
+.red { color: #D11A1A; }
+
+/* ---------- 꼬리말 ---------- */
+.foot { margin-top: 24px; color: #95A5A6; font-size: 8.5pt; text-align: right; }
