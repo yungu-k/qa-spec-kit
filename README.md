@@ -46,6 +46,20 @@ Claude Code로 이 폴더를 열면 `CLAUDE.md`가 자동 로드됩니다. 팀�
 - **초록은 「통과」와 「아무것도 안 봄」을 구분하지 못한다** — 새 검사는 일부러 실패시켜 본다
 - **만든 세션이 자기 산출물을 최종 검증하지 않는다** — 역할을 가르는 이유는 분업이 아니라 독립성이다
 
+## 문서 상태 (frontmatter)
+
+모든 문서 머리에 라이프사이클 표시가 있다 — 낡은 문서가 낡았다고 말하지 않으면
+읽는 쪽이 낡은 규칙을 현행으로 믿게 되기 때문이다.
+
+```yaml
+status: active     # active | draft | superseded | archived
+owner: QA          # 관리 주체 (역할명)
+updated: 2026-08-28
+# status: superseded 면 superseded_by: <정본 경로> 필수
+```
+
+`archived`/`superseded` 문서는 참조용이다 — 규칙으로 따르지 말 것.
+
 ## License
 
 MIT
