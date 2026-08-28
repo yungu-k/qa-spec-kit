@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-24
+---
+
 # [Template] Hotfix QA Verification Report (PDF)
 
 Hotfix / 소규모 배포건 검증 완료 보고용 **간단 PDF** 리포트 템플릿.

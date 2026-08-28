@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-24
+---
+
 # [Standard] Report Style Policy — 내용과 스타일을 가른다
 
 | Version | Date | Author | Changes |

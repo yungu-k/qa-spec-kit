@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-24
+---
+
 # QA_ENGINEER_CONTEXT — QA 엔지니어 팀원 헌법
 
 > 이 파일 = QA 엔지니어 팀원의 헌법(불변). 규칙이 프롬프트와 충돌하면 **이 파일이 이긴다.**

@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-24
+---
+
 # qa-spec-kit
 
 AI Agent(Claude Code)와 함께 일하는 QA 팀의 **규격 문서 모음**입니다. 프롬프트가 아니라 규격 문서가 자동화 품질을 결정한다는 원칙으로, 실무에서 1년간 실수 → 교정 → 문서화를 거치며 다듬어진 실물입니다.

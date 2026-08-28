@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-24
+---
+
 # [Index] QA Automation Project — Domain Entry Point
 
 | Version | Date | Author | Changes |

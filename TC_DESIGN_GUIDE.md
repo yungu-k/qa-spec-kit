@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-24
+---
+
 # [Standard] Senior QA Test Case Design Guide
 
 | Version | Date | Author | Changes |

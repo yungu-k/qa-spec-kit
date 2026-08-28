@@ -1,3 +1,9 @@
+---
+status: active
+owner: shared
+updated: 2026-08-24
+---
+
 # [Standard] AI 팀원 세션 역할 정의
 
 | Version | Date | Author | Changes |

@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-28
+---
+
 # qa-engineer-focus — 지금 어디 (가변)
 
 > ⚠ **이 파일은 템플릿이다. 여기에 실제 상태를 적지 마라.**

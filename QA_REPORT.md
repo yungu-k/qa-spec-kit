@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-24
+---
+
 # [Standard] QA Report Design Guide
 
 QA Result (Sign-off) Report 및 QA Status Report Google Sheets 작성 규격 정의.

@@ -1,3 +1,9 @@
+---
+status: active
+owner: QA
+updated: 2026-08-24
+---
+
 # [Standard] Verification Guide — 검사가 실제로 무언가를 보고 있는가
 
 | Version | Date | Author | Changes |
