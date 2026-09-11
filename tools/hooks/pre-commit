@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# 공개 저장소 반출 검사 — **커밋마다 전 트리**를 본다.
+#
+# ## 왜 diff 가 아니라 전 트리인가
+#
+# 2026-09-11: 사내 식별자 4곳이 **15~51일** 공개돼 있었다. 2026-08-24 익명화 때 놓친 것들이고
+# 그 뒤 아무도 다시 안 봤다. **내가 §3 을 증보하며 「추가된 줄만」 grep 했을 때도 안 걸렸다.**
+# diff 만 보면 **이미 들어가 있는 것은 영원히 안 보인다.**
+#
+# ## 왜 패턴을 여기 안 적나
+#
+# 🔴 **금지 대상을 적으면 그 파일이 곧 위반이 된다.** 훅에 실명을 적는 순간
+# 공개 저장소에 실명이 하나 더 생긴다. ⇒ 패턴은 **저장소 밖**에서 읽는다.
+#
+#   기본 경로: ~/.config/qa-spec-kit/forbidden.txt   (env: QA_SPEC_FORBIDDEN)
+#   한 줄에 정규식 하나. `#` 로 시작하면 주석.
+#
+# **파일이 없으면 통과시키지 않는다.** 「설정이 없다」를 「깨끗하다」로 접으면
+# 검사를 안 붙인 저장소가 붙인 것처럼 보인다.
+#
+# 우회: git commit --no-verify   (막으면 사람이 훅을 지운다. 지워진 훅은 아무것도 안 막는다)
+set -uo pipefail
+
+LIST="${QA_SPEC_FORBIDDEN:-$HOME/.config/qa-spec-kit/forbidden.txt}"
+if [ ! -r "$LIST" ]; then
+  cat >&2 <<MSG
+
+반출 패턴 목록을 못 읽었다: $LIST
+
+  이 저장소는 **공개**다. 패턴 목록이 없으면 검사를 할 수 없고,
+  **못 하는 것을 통과로 접지 않는다.**
+
+  만들어라 (한 줄에 정규식 하나):
+    mkdir -p "$(dirname "$LIST")"
+    \$EDITOR "$LIST"
+
+  ⚠ 이 목록은 **저장소 밖**에 둔다 — 안에 두면 금지 대상이 공개된다.
+
+MSG
+  exit 1
+fi
+
+# 추적 중인 텍스트 파일 전부 — 스테이징된 것만이 아니다
+mapfile -t FILES < <(git ls-files -z | tr '\0' '\n' | grep -vE '^\.git/' || true)
+[ "${#FILES[@]}" -eq 0 ] && exit 0
+
+hits=0
+while IFS= read -r pat; do
+  [ -z "$pat" ] && continue
+  case "$pat" in \#*) continue ;; esac
+  # -I: 바이너리 건너뜀. 출현 **위치 전수**로 낸다 — 항목으로 접으면 두 번째 사본을 놓친다
+  while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    echo "  ✗ $line" >&2
+    hits=$((hits+1))
+  done < <(grep -InE "$pat" -- "${FILES[@]}" 2>/dev/null | head -40)
+done < "$LIST"
+
+if [ "$hits" -gt 0 ]; then
+  cat >&2 <<MSG
+
+반출 위반 $hits 곳. 커밋을 멈춘다.
+
+  이 저장소는 공개다. 사내 식별자(저장소명·호스트·테이블명·경로·실명)는
+  **자리표시자**로 바꾼다 — README 의 스킴을 쓴다.
+
+  ⚠ 같은 문자열이 **여러 파일**에 있을 수 있다. 위 목록은 **출현 위치 전수**다 —
+    한 곳만 고치고 넘어가면 나머지가 남는다(2026-09-11 실제 사례).
+
+  급하면 우회:  git commit --no-verify
+
+MSG
+  exit 1
+fi
+exit 0

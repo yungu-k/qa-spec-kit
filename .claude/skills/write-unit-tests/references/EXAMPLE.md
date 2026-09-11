@@ -1,6 +1,6 @@
 # [품질 앵커] 유닛 테스트 — 칩 교환 금액 계산 helper
 
-> repo: qa-orchestrator  ·  프레임워크: vitest  ·  테스트 파일: `src/lib/exchange.test.ts`  ·  작성일: 2026-07-01
+> repo: 자동화 오케스트레이터  ·  프레임워크: vitest  ·  테스트 파일: `src/lib/exchange.test.ts`  ·  작성일: 2026-07-01
 > (예시 — 실제 대상은 repo 소스로 계약 재확인. 값·경계는 스펙 확인 후 확정)
 
 ## 대상 계약
