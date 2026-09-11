@@ -24,6 +24,23 @@ AI Agent(Claude Code)와 함께 일하는 QA 팀의 **규격 문서 모음**입�
 | `QA_ENGINEER_CONTEXT.md` · `state/` | AI QA 엔지니어 팀원의 '헌법'(불변) + 가변 상태 템플릿 |
 | `.claude/agents/` `.claude/skills/` `.claude/commands/` | subagent 페르소나 + 스킬 3종(커버리지 조언/유닛 테스트/diff 영향도) + 슬래시 커맨드 |
 
+### 반출 훅 (권장)
+
+이 저장소는 **공개**다. 커밋마다 **전 트리**를 훑어 사내 식별자를 막는 훅이 들어 있다.
+
+```bash
+git config core.hooksPath tools/hooks
+mkdir -p ~/.config/qa-spec-kit
+$EDITOR ~/.config/qa-spec-kit/forbidden.txt   # 한 줄에 정규식 하나
+```
+
+⚠ **패턴 목록은 저장소 밖에 둔다** — 안에 두면 금지 대상이 공개된다.
+목록이 없으면 훅은 **통과가 아니라 거부**한다(못 재는 것을 깨끗함으로 접지 않는다).
+
+⚠ **걸고 끝내지 말고 막히는지 쳐 봐라.** 위반 한 줄을 넣어 커밋해 보면 된다 —
+`core.hooksPath` 를 잡아도 훅에 실행 권한이 없으면 **조용히 안 돈다.**
+(`/mnt/c` 같은 DrvFs 는 권한이 늘 `rwx` 로 보여서 `ls -l` 로는 못 가른다.)
+
 ## 사용법
 
 Claude Code로 이 폴더를 열면 `CLAUDE.md`가 자동 로드됩니다. 팀에 맞게 고칠 것:
