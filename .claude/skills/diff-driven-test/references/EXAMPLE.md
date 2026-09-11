@@ -17,7 +17,7 @@
 | 3 | UnderPay/OverPay/권종불일치/Detect우선 에러(200018~200021) | 변경 | 각 케이스 화면·거래내역 에러코드 노출 | (검증완료) |
 
 ## git 밖 변경 확인
-- **DB 스키마**: Platform 측 신규 `tb_cartridge_rfid` 등 — dev 미푸시분 존재(platform-uat). diff 밖 → 별도 확인 필요.
+- **DB 스키마**: Platform 측 신규 `tb_deviceA_tag` 등 — dev 미푸시분 존재(platform-uat). diff 밖 → 별도 확인 필요.
 
 ## 미완 / 대기
 - Platform RFID(RL2-002-1~4): baseline `platform-rollback-1.0.3.0` ↔ `platform-uat`. 단 **platform-uat 에 미푸시 웹소스 + DB 스키마 변경 존재** → 현 TC 는 푸시분까지만 부분 커버. **dev 푸시 후 재fetch → 재diff 로 보강 예정.**

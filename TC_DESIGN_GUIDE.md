@@ -559,7 +559,7 @@ Full TC에서 **핵심 크리티컬 패스(Critical Path)**만 추출해 빌드 
 
 git diff는 **소스 코드(웹)만** 잡음. 아래는 diff에 안 나오므로 별도 확인. 놓치면 "코드는 됐는데 기능 안 됨" 또는 배포 후 장애.
 
-* **DB 스키마/데이터**: 신규 테이블·컬럼(예: `tb_cartridge_rfid`, `tb_kiosk.rfidmode`) 추가는 mapper 쿼리엔 보여도 CREATE/ALTER SQL이 repo에 없을 수 있음 → dev가 DB에 직접 반영. **기능 동작 전제라 TC Pre-Condition에 "관련 DB 스키마 반영됨" 명시**.
+* **DB 스키마/데이터**: 신규 테이블·컬럼(예: `tb_deviceA_tag`, `tb_kioskA.tagmode`) 추가는 mapper 쿼리엔 보여도 CREATE/ALTER SQL이 repo에 없을 수 있음 → dev가 DB에 직접 반영. **기능 동작 전제라 TC Pre-Condition에 "관련 DB 스키마 반영됨" 명시**.
 * **Service/디바이스(별도 repo, C++)**: 키오스크 디바이스 로직은 웹 repo diff에 없음.
 * **설정·권한·환경변수**: 배포 설정, 계정 권한(ROLE_*), Platform 옵션 등.
 * → diff로 웹 변경 산정 후, **DB/Service/설정 변경 여부는 dev에게 별도 확인**(§6.5.4 Jira/커밋 하이브리드로도 단서 확보). 완료 커밋이 오래돼 보여도 그게 완료 시점이면 정상 — 미완 신호로 오해 금지.
