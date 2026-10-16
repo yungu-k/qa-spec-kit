@@ -26,8 +26,7 @@ updated: 2026-08-24
 | 도메인 | 규격 파일 | 적용 시점 |
 | :--- | :--- | :--- |
 | **TC 설계 + Bug Report** | [`TC_DESIGN_GUIDE.md`](./TC_DESIGN_GUIDE.md) | Figma → TC 설계, Jira 버그 등록 시 |
-| **QA 리포팅 (Result + Status)** | [`QA_REPORT.md`](./QA_REPORT.md) | QA 종료 보고(Sign-off), 진행 중 현황 보고 시 |
-| **Hotfix 검증 리포트** | [`HOTFIX_REPORT_TEMPLATE.md`](./HOTFIX_REPORT_TEMPLATE.md) | Hotfix 검증 후 PDF 리포트 산출 시 |
+| **QA 리포팅 (Result + Status + PDF 템플릿)** | [`QA_REPORT.md`](./QA_REPORT.md) | QA 종료 보고(Sign-off), 진행 중 현황 보고, Sign-off·Hotfix·UAT PDF 리포트 산출(§11.4 템플릿) 시 |
 | **검증 방법론 (검사가 실제로 보고 있나)** | [`VERIFICATION_GUIDE.md`](./VERIFICATION_GUIDE.md) | 테스트·감사·자동화 검사를 **새로 쓸 때**, 남의 검증 결과를 **재확인할 때**, 무변경 리팩터를 증명할 때 |
 | **리포트 스타일 규약 (내용/스타일 분리)** | [`REPORT_STYLE_POLICY.md`](./REPORT_STYLE_POLICY.md) · [`assets/report.css`](./assets/report.css) | 리포트·문서를 **발행**하기 직전. 스타일을 직접 짜고 싶어질 때 |
 | **AI 팀원 세션 역할** | [`SESSION_ROLES.md`](./SESSION_ROLES.md) | 세션이 여럿일 때 — 누가 결정하나, 누구에게 넘기나 |
@@ -55,8 +54,7 @@ updated: 2026-08-24
 qa-spec-kit/
 ├── CLAUDE.md                          # 본 파일 (Index, 자동 로드)
 ├── TC_DESIGN_GUIDE.md                 # TC 설계 + Bug Report 규격
-├── QA_REPORT.md                       # QA Result + QA Status 리포팅 규격
-├── HOTFIX_REPORT_TEMPLATE.md          # Hotfix 검증 PDF 리포트 템플릿
+├── QA_REPORT.md                       # QA Result + QA Status 리포팅 규격 + PDF 리포트 HTML 템플릿(§11.4)
 ├── VERIFICATION_GUIDE.md              # 검증 방법론 — 검사가 실제로 보고 있는가
 ├── REPORT_STYLE_POLICY.md             # 리포트 내용/스타일 분리 규약
 ├── SESSION_ROLES.md                   # AI 팀원 5개 세션 역할·경계·라우팅

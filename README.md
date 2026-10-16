@@ -17,8 +17,7 @@ AI Agent(Claude Code)와 함께 일하는 QA 팀의 **규격 문서 모음**입�
 | `CLAUDE.md` | 도메인 인덱스 — Claude Code가 매 세션 자동 로드하는 진입점 |
 | `TC_DESIGN_GUIDE.md` | TC 설계 + Bug Report 규격 — 필수 컬럼, 서식 체크리스트 9단계, diff 기반 영향도 TC, 테스터 언어 원칙 |
 | `VERIFICATION_GUIDE.md` | **검사가 실제로 무언가를 보고 있는가** — 눈 없는 단언 7유형, 원본을 돌리는 검증, 무변경은 해시로 증명, 최종 매체 감사 |
-| `QA_REPORT.md` | QA Result(Sign-off)·QA Status 리포트 규격 + 메일 양식 · 경영진 하이라이트 선별 · QA Plan 원칙 |
-| `HOTFIX_REPORT_TEMPLATE.md` | Hotfix 검증 PDF 리포트 템플릿 (headless 브라우저 인쇄) |
+| `QA_REPORT.md` | QA Result(Sign-off)·QA Status 리포트 규격 + **PDF 리포트 HTML 템플릿(Sign-off·Hotfix·UAT, headless 브라우저 인쇄)** · 메일 양식 · 경영진 하이라이트 선별 · QA Plan 원칙 |
 | `REPORT_STYLE_POLICY.md` · `assets/report.css` | 리포트 내용/스타일 분리 규약 + 공용 CSS 1벌 |
 | `SESSION_ROLES.md` | AI 팀원 세션(planner/dev/QA/design/tw) 역할·경계·라우팅 |
 | `QA_ENGINEER_CONTEXT.md` · `state/` | AI QA 엔지니어 팀원의 '헌법'(불변) + 가변 상태 템플릿 |

@@ -42,8 +42,8 @@ updated: 2026-08-24
 
 ```html
 <!-- ✅ 내용 세션이 쓰는 것 — 클래스만 -->
-<div class="flag"><b>NFC 오탐</b> 물리 이슈 미해결인데 정상 복구 알림 발송.</div>
-<td class="res-fail">FAIL</td>
+<div class="note n-warn"><span class="lbl">NFC 오탐</span>물리 이슈 미해결인데 정상 복구 알림 발송.</div>
+<td class="c"><span class="chip c-bad">FAIL</span></td>
 
 <!-- ❌ 내용 세션이 쓰면 안 되는 것 -->
 <div style="background:#FEF9E7;border-left:4px solid #F1C40F;padding:10px">…</div>
@@ -151,7 +151,7 @@ updated: 2026-08-24
 
 ## 6. 기존 문서와의 관계
 
-- [`HOTFIX_REPORT_TEMPLATE.md`](./HOTFIX_REPORT_TEMPLATE.md) — 이 규약을 따르는 템플릿.
-  §3 HTML 은 **클래스만** 쓰고 스타일은 `assets/report.css` 에 있다.
+- [`QA_REPORT.md`](./QA_REPORT.md) §11.4 — 이 규약을 따르는 리포트 HTML 템플릿(Sign-off·Hotfix·UAT 공통).
+  HTML 은 **클래스만** 쓰고 스타일은 `assets/report.css` 에 있다.
 - [`QA_REPORT.md`](./QA_REPORT.md) §11 — PDF 산출 룰. 스타일 원본 지정은 이 문서로 넘겼다.
 - [`SESSION_ROLES.md`](./SESSION_ROLES.md) §5 — 디자인 세션의 역할·경계.

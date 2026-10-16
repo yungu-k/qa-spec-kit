@@ -540,21 +540,26 @@ Section 3~5 = 데이터 건수 따라 행 가변. 각 Section 시작 행 = **이
 
 | 시점 | 산출물 |
 | :--- | :--- |
-| Release Train **QA OK-Sign** | QA Result Report PDF |
-| **Hotfix 검증 완료** | Hotfix QA Report PDF (`HOTFIX_REPORT_TEMPLATE.md` 템플릿) |
+| Release Train **QA OK-Sign** | QA Result Report PDF (§11.4 템플릿) |
+| **Hotfix 검증 완료** | Hotfix QA Report PDF (§11.4 템플릿, Hotfix 변형) |
+| **현장(UAT) Sign-off** | UAT QA Report PDF (§11.4 템플릿, UAT 변형) |
 | 그 외 | 요청 기반 |
+
+> 2026-10-16: 리포트 HTML 템플릿을 이 문서 §11.4~§11.6 으로 통합했다. 따로 있던 Hotfix 템플릿 문서는 없앴다 — 세 종류가 같은 뼈대를 쓰고 섹션만 빠진다.
 
 ### 11.2. 네이밍
 
 * Release: `{버전}_QA_Report_{YYYY-MM-DD}.pdf`
 * Hotfix: `{버전}_Hotfix_QA_Report_{YYYY-MM-DD}.pdf` (기존 룰 유지)
+* UAT: `{버전}_UAT_QA_Report_{YYYY-MM-DD}.pdf`
+* `{버전}` = 배포 차수(Version 페이지 표기, 예 `10.1th`, `11th_S01`). `{YYYY-MM-DD}` = 검증 완료일.
 
 ### 11.3. 원칙
 
 * **원본-파생**: PDF 는 파생물. 수정은 항상 원본(HTML/시트) → 재출력. PDF 직접 수정 금지.
 * **생성 방법 (표준)**: 팀 리포트 폴더에 **HTML 작성 → headless 브라우저 인쇄 스크립트**. Google Sheets export 방식은 품질 낮아 사용 금지.
   - ⚠️ **인쇄 스크립트에 파일명을 반드시 인자로 준다.** 인자 없이 돌면 폴더 전체가 재렌더된다.
-  - 통합(Result) 리포트 섹션 구성: Opinion / TC Result / Defect / Verification / Release Version / (부속 데이터) / Known Issue & Recommendation
+  - 섹션 구성과 HTML 뼈대는 §11.4, 변환 스크립트는 §11.5, 생성기가 지킬 검사는 §11.6
   - 데이터 정합: 수치·Verdict 는 QA Result 시트 탭과 일치시킬 것 (시트 = 데이터 원본, HTML = 발행본)
 * **스타일 (2026-08-21 규약 변경)**: HTML 에 `<style>` 를 새로 짜지 않는다. 공용 CSS
   [`assets/report.css`](./assets/report.css) 한 벌을 링크하고 **클래스만** 쓴다.
@@ -566,6 +571,186 @@ Section 3~5 = 데이터 건수 따라 행 가변. 각 Section 시작 행 = **이
   절차는 [`VERIFICATION_GUIDE.md`](./VERIFICATION_GUIDE.md) §4.
 * **보관**: 팀 리포트 폴더 + 사내 저장소만. 외부 호스팅 금지 (고객 데이터 민감성 정책과 일관).
 * 발송 전 숫자·버전·날짜 최종 검수 1회. **(육안 검수는 글리프 소실을 못 잡는다 — 위 항목 별도 수행)**
+
+### 11.4. 리포트 HTML 템플릿 (Sign-off · Hotfix · UAT 공통)
+
+> 구조의 정답은 실제로 발행한 스프린트 Sign-off 리포트(2026-09-17, A4 7쪽, CONDITIONAL PASS)다. 아래 뼈대는 그 리포트에서 데이터와 고객 정보를 걷어 낸 것이다.
+> **이 템플릿을 쓰는 세션은 내용만 쓴다.** 스타일은 [`assets/report.css`](./assets/report.css) 한 벌이고 HTML 은 클래스만 쓴다(§11.3 · [`REPORT_STYLE_POLICY.md`](./REPORT_STYLE_POLICY.md)).
+
+#### 11.4.1. 섹션 구성과 종류별 차이
+
+| # | 블록 | 내용 | Sign-off | Hotfix | UAT |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| — | 표지 `.cover` | 리포트 종류 · 제목 · 한 줄 요약 · 대상 모듈 버전 칩 · Date/QA Lead/Sprint/Scope/Environment | ● | ● | ● |
+| — | 판정 히어로 `.verdict` | 판정 도장 + 조건 목록 + 판정 문장 | ● | ● | ● |
+| 01 | QA Opinion | 수치 타일 4칸(TC·검출 결함·수정 완료·나머지) + 조건 근거 콜아웃 + 환경 참고 콜아웃 | ● | ● | ● |
+| 02 | Release Version | 모듈별 버전 정의 그리드 + 출처 각주 | ● | ● | ○ |
+| 03 | Test Case Result | KPI 5칸 + 시트별 결과 비율 바 + 집계 표 + N/A 사유 | ● | ○ | ● |
+| 04 | Defect Summary | 결함 요약 문장 + 우선순위 축 + 상태별 목록 + 결함 표 | ● | ○ | ○ |
+| 05 | Verification Details | 검증 영역별 번호 목록 + 소계 + 결과 칩 | ● | ● | ● |
+| 06 | 판정 및 잔여 항목 | Sign-off 조건 · Known Issue/보류 결함 블록 | ● | ● | ● |
+| — | 부속 데이터 | UAT 의 성능 측정 등 별도 데이터(예: 실물 인식률) | — | — | ● |
+
+● 필수 · ○ 해당 있을 때만 · — 없음. **번호는 빠진 섹션을 건너뛰지 않고 다시 매긴다.**
+
+#### 11.4.2. 판정 · 결과 클래스
+
+| 판정 | 히어로 | 도장 문구 |
+| :--- | :--- | :--- |
+| `PASS` | `.verdict` | `PASS` |
+| `CONDITIONAL PASS` | `.verdict.is-hold` | 라벨 `Conditional` + 값 `PASS` |
+| `FAIL` | `.verdict.is-fail` | `FAIL` |
+| `ON HOLD` | `.verdict.is-hold` | 라벨 `On hold` |
+
+| 결과·상태 | 칩 |
+| :--- | :--- |
+| PASS · Fixed | `.chip.c-ok` |
+| FAIL · Open | `.chip.c-bad` |
+| N/A · Known Issue · Won't Fix · Postponed | `.chip.c-na` |
+| N/T · 정보 | `.chip.c-info` |
+
+* 색 값은 `assets/report.css` 안에만 있다. **여기에 hex 를 다시 적지 않는다** — 두 군데 적히는 순간 어느 쪽이 원본인지 알 수 없다.
+* 결과 비율 바의 폭(`style="width:…%"`)만은 데이터라 인라인을 허용한다. 그 외 인라인 `style=` 금지.
+
+#### 11.4.3. HTML 뼈대
+
+반복 블록은 한 줄씩만 적었다. `{{…}}` 는 시트·Jira 에서 읽어 채운다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<title>{{REPORT_TITLE}}</title>
+<link rel="stylesheet" href="assets/report.css">
+</head><body>
+
+<div class="cover">
+  <div class="eyebrow">QA Sign-off Report</div>              <!-- Hotfix: QA Hotfix Report / UAT: UAT Sign-off Report -->
+  <h1>{{RELEASE}} · {{SPRINT}} — {{CUSTOMER}}</h1>
+  <p class="deck">{{한 줄 요약 — 범위와 판정}}</p>
+  <div class="mods"><span class="mod">{{모듈}} <b>{{버전}}</b></span></div>
+  <div class="meta">
+    <div><dt>Date</dt><dd>{{DATE}}</dd></div>
+    <div><dt>QA Lead</dt><dd>{{작성자}}</dd></div>
+    <div><dt>Sprint</dt><dd>{{SPRINT}}</dd></div>
+    <div><dt>Scope</dt><dd>{{N}}개 시트 {{TOTAL}} TC</dd></div>
+    <div><dt>Environment</dt><dd>{{검증 환경 · 운영 장비와 다르면 그 사실}}</dd></div>
+  </div>
+</div>
+
+<div class="verdict is-hold">                                 <!-- §11.4.2 -->
+  <div class="stamp"><div class="lbl">Conditional</div><div class="val">PASS</div></div>
+  <div class="body">
+    <div class="hd">조건부 통과 — CONDITIONAL PASS</div>
+    {{범위 한 문장}}<ol>
+      <li><b>{{조건 대상}}</b> — {{무엇을 언제 어디서 추가 검증}}</li>
+    </ol>
+    <b>{{판정 문장 — 사람이 쓴 원문 그대로}}</b>
+  </div>
+</div>
+
+<h2><span class="num">01</span>QA Opinion</h2><div class="rule"></div>
+<div class="stats">
+  <div class="stat"><div class="v">{{TOTAL}}<small> TC</small></div><div class="k">{{N}}개 시트 · FAIL {{F}}</div><div class="s">PASS {{P}} / N/A {{NA}} / N/T {{NT}} · Success Rate {{RATE}}%</div></div>
+  <div class="stat"><div class="v">{{D}}<small> 건</small></div><div class="k">검출 Defect</div><div class="s">P0 {{}} / P1 {{}} / P2 {{}} / P3 {{}}</div></div>
+  <div class="stat"><div class="v">{{FIXED}}<small> 건</small></div><div class="k">수정 완료</div><div class="s">{{P0 처리 한 줄}}</div></div>
+  <div class="stat"><div class="v">{{REST}}<small> 건</small></div><div class="k">나머지</div><div class="s">Known Issue {{}} · 수정 안 함 {{}} · Postponed {{}}</div></div>
+</div>
+<div class="note n-warn"><span class="lbl">조건 근거</span><ol><li>{{QA 리드 의견 원문}}</li></ol></div>
+<div class="note n-flat"><span class="lbl">환경 참고</span><ul><li>{{장비·환경 특기}}</li></ul></div>
+
+<h2><span class="num">02</span>Release Version</h2><div class="rule"></div>
+<dl class="kv nb">
+  <dt>{{제품}} · {{모듈}}</dt><dd class="ver"><span class="new">{{버전}}</span></dd>   <!-- 바뀐 것: <span class="old">구</span><span class="arw">→</span><span class="new">신</span> -->
+</dl>
+<div class="foot-note">* 출처: {{버전 페이지 이름 · 판 번호}}</div>
+
+<h2><span class="num">03</span>Test Case Result</h2><div class="rule"></div>
+<div class="kpis">
+  <div class="kpi k-tot"><div class="v">{{TOTAL}}</div><div class="k">Total</div><div class="s">{{N}}개 시트 합산</div></div>
+  <div class="kpi k-ok"><div class="v">{{P}}</div><div class="k">Pass</div><div class="s">N/T {{NT}}</div></div>
+  <div class="kpi k-bad"><div class="v">{{F}}</div><div class="k">Fail</div><div class="s">TC 기준</div></div>
+  <div class="kpi k-na"><div class="v">{{NA}}</div><div class="k">N / A</div><div class="s">사유는 아래</div></div>
+  <div class="kpi k-rate"><div class="v">{{RATE}}<small>%</small></div><div class="k">Success Rate</div><div class="s">PASS ÷ (Total - N/A)</div></div>
+</div>
+<div class="suites">
+  <div class="srow"><div class="shd"><span class="nm">{{시트 이름}}</span><span class="ct">PASS {{}} · N/A {{}} · 총 {{}}</span></div>
+    <div class="sbar"><div class="sseg sp" style="width:{{PASS%}}%"></div><div class="sseg sn" style="width:{{NA%}}%"></div></div></div>
+</div>
+<table><thead><tr><th>Category</th><th class="n">Total</th><th class="n">PASS</th><th class="n">FAIL</th><th class="n">N/A</th><th class="n">N/T</th><th class="n">Success Rate</th></tr></thead><tbody>
+  <tr><td>{{시트 이름}}</td><td class="n">{{}}</td><td class="n">{{}}</td><td class="n">{{}}</td><td class="n">{{}}</td><td class="n">{{}}</td><td class="n"><b>{{}}%</b></td></tr>
+  <tr><td><b>합계</b></td><td class="n"><b>{{TOTAL}}</b></td><td class="n"><b>{{P}}</b></td><td class="n"><b>{{F}}</b></td><td class="n"><b>{{NA}}</b></td><td class="n"><b>{{NT}}</b></td><td class="n"><b>{{RATE}}%</b></td></tr>
+</tbody></table>
+<div class="note n-flat"><span class="lbl">N/A {{NA}}건 사유</span><ul><li>{{시트}} {{n}}건: {{사유 — 시트 비고에 없으면 「사유 보완 필요」, 지어 넣지 않는다}}</li></ul></div>
+
+<h2><span class="num">04</span>Defect Summary</h2><div class="rule"></div>
+<p>{{결함 요약 한 문장 — 검출 수, 우선순위 분포, 수정 완료 수, 나머지 분류}}</p>
+<div class="axes"><div class="ax"><span class="t">P0</span><span class="r"><span class="v">{{}}<small> 건</small></span></span></div></div>
+<table><thead><tr><th class="n">No.</th><th>Key</th><th>Pri.</th><th>Status</th><th>Summary</th></tr></thead><tbody>
+  <tr><td class="n">1</td><td><b>{{PROJ-0000}}</b></td><td>P0</td><td><span class="chip c-ok">Fixed</span></td><td>{{요약}}</td></tr>
+</tbody></table>
+
+<h2><span class="num">05</span>Verification Details</h2><div class="rule"></div>
+<table><thead><tr><th>Test Area</th><th>Key Verification Items</th><th>Result</th></tr></thead><tbody>
+  <tr><td class="area">{{영역}}<span>{{세부}}</span></td>
+      <td><ol><li>{{PROJ-0000}} {{검증 항목 — 테스터 언어}}</li></ol><div class="hint">{{n}}건 중 {{p}}건 PASS / {{na}}건 N/A</div></td>
+      <td class="c"><span class="chip c-ok">PASS</span></td></tr>
+</tbody></table>
+
+<h2><span class="num">06</span>판정 및 잔여 항목</h2><div class="rule"></div>
+<div class="decision">
+  <div class="block b-check"><div class="bh"><span class="dot"></span>Sign-off 조건 (이행 필요)</div><ul><li>{{조건}}</li></ul></div>
+  <div class="block b-watch"><div class="bh"><span class="dot"></span>Known Issue · 보류 결함</div><ul><li><b>{{PROJ-0000}}</b> ({{Pri}}, {{상태}}) — {{요약}}</li></ul></div>
+</div>
+
+<div class="foot">Generated {{DATE}} · QA · {{COMPANY}} · {{CUSTOMER}}</div>
+</body></html>
+```
+
+* **언어:** 헤더·라벨 = 영문, 내용(의견·검증 항목) = 한국어. 판정은 전체 대문자.
+* **검증 항목:** 콤마 나열 금지 → 번호 목록 + 소계 줄(`.hint`).
+* **사실 기반:** 시트·Jira 에 실존하는 값만. 유추·허위 금지. 사람의 의견·판정 문장은 **원문 그대로** 넣는다.
+* **판정·조건이 세 자리(히어로 · 01 조건 근거 · 06 조건)에 서면** 자리마다 역할을 하나씩 준다 — 히어로 = 판정과 조건 이름, 01 = 사람의 근거 원문, 06 = 이행할 일.
+* **문장을 다른 자리로 옮기면 지시어를 다시 읽는다.** 「위 내용과」가 가리키는 대상이 바뀐다(2026-09-17 실례). 원문 보존 검사(글자 그대로 있나)는 이걸 못 잡는다.
+
+#### 11.4.4. Hotfix · UAT 변형
+
+* **Hotfix**: 범위가 작아 03·04 는 해당 있을 때만. 05 는 Hotfix 대상 영역 1~3개. 01 의 타일은 검증 항목 수·PASS·결함 수 정도로 줄인다.
+* **UAT**: 현장 결과를 03 으로, 현장 측정(예: 실물 인식 성능)을 부속 데이터 섹션으로. 02 는 현장 설치 버전이 사내와 다를 때만.
+
+### 11.5. PDF 변환 (headless Edge)
+
+> 별도 PDF 라이브러리 불필요. Windows 기본 Edge 사용. 외부 호스팅 안 함 → 리포트 호스팅 정책 부합.
+
+```powershell
+param([string]$File)          # ⚠️ 인자 필수 — 아래 경고 참조
+
+$edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+$html = $File
+$out  = [IO.Path]::ChangeExtension($html, ".pdf")
+$url  = "file:///" + ($html -replace '\\','/')
+Start-Process -FilePath $edge -ArgumentList @(
+  "--headless","--disable-gpu","--no-pdf-header-footer",
+  "--print-to-pdf=`"$out`"","`"$url`""
+) -Wait -WindowStyle Hidden
+```
+
+* `--no-pdf-header-footer` = 페이지 상하단 URL/날짜 자동 삽입 제거.
+* 입력은 `file:///` 절대 경로로 준다 — 상대 경로면 DNS 조회로 가서 종료 코드 0 에 PDF 가 없다.
+* ⚠️ **파일명을 반드시 인자로 준다.** 인자를 안 받거나 기본값으로 폴더를 훑는 형태로 만들면 **폴더 전체가 재렌더**된다. 실제로 남의 산출물까지 덮어쓴 사고가 있었다.
+* **글리프 감사 (필수)**: 실측으로 `−`(U+2212) · `⚡`(U+26A1) · `✓`(U+2713) 는 PDF 에서 소실, `→ ÷ ↳ ※ ① ② ⟳ ✗ — ↑ ↔` 는 정상. **`✗` 는 살고 `✓` 는 죽는다** — 짐작으로 고를 수 없다. 소스 HTML + 산출 PDF 두 층위를 다 감사한다([`VERIFICATION_GUIDE.md`](./VERIFICATION_GUIDE.md) §4).
+* **렌더 확인**: 쪽마다 눈으로 본다. 강제 쪽나눔이 빈 쪽을 만들고(8쪽 → 6쪽으로 줄인 실례), 병합 칸 열 위치를 짐작하면 값이 엉뚱한 칸에 찍힌다.
+
+### 11.6. 생성기가 지킬 검사
+
+리포트를 스크립트로 만들면 아래를 **assert 로 넣는다** — 하나라도 어긋나면 리포트를 만들지 않고 죽는다. 전부 실제로 갈라진 적이 있는 자리다.
+
+1. **문장 속 수치 ↔ 집계 칸**: 시트에서 사람이 쓴 문장(종합 의견)의 수치가 수식 칸과 같은가. 결과 한 건이 N/A→PASS 로 바뀌자 수식 칸은 따라가고 문장은 옛 수 그대로였다.
+2. **결함 문장 ↔ Jira 목록**: 문장의 결함 수·수정 완료 수가 넣기 직전 JQL 로 다시 센 목록과 같은가.
+3. **버전표 ↔ 버전 페이지**: 리포트의 버전표가 그 시점 버전 페이지의 판과 같은가(판 번호를 같이 적는다). 발행 당일 버전 페이지가 한 판 올라가 있었다.
+4. **의견 구조**: 종합 의견의 빈 줄 수와 첫 줄·결함 줄·판정 줄 위치 — 디자인 정리안이 이 자리 매핑에 기대므로, 시트 문구가 바뀌어 매핑이 어긋나면 죽어야 한다.
+5. **집계 범위**: 시트의 결과 열을 「이름이 정확히 일치하는 열」로 찾는다. 「Result 가 들어간 첫 열」로 찾았다가 `Expected Result` 를 센 실례가 있다. 시트 탭 자체 요약 수식이 마지막 행을 빠뜨린 적도 있으니 **행 단위로 직접 센 값**과 대조한다.
+6. **생성기는 저장소에 둔다.** 세션 임시 폴더에 두었다가 사라진 실례가 있다 — 산출물만 남고 위 검사 장치가 함께 없어진다.
 
 ---
 
@@ -617,6 +802,32 @@ Sign-off 시 결과 리포트 링크로 재공유 드리겠습니다.
 * 수치·Verdict 는 발행된 PDF 리포트와 일치시킬 것 (리포트가 원본, 메일은 요약).
 * 특이사항은 최대 1줄 — 길어지면 리포트 §Known Issue 로 보내고 메일에는 "리포트 §N 참조".
 * 이력 축적: 발행 시 Confluence QA Reports 인덱스(도입 시)에 한 줄 추가 — 차수/일자/Verdict/링크.
+
+### 12.4. Hotfix 검증 완료 메일 (PDF 첨부와 한 세트)
+
+> **원칙:** PDF 는 첨부(상세·아카이브). **판정·결정 요청은 메일 본문 텍스트로 박아 열지 않고도 읽히게.** "첨부 참고"로만 끝내면 결정건은 안 움직인다 → 결정 필요건은 **담당 지목 + 명시 요청**.
+
+* **제목에 판정 포함** — 열기 전 보이게.
+* **본문 순서:** ① 판정 → ② 검증 결과(영역별 1줄) → ③ 결정 필요(★) → ④ "상세는 첨부 참고"
+* **결정 필요건:** "참고 부탁" 금지. **담당자 지목 + "결정 부탁드립니다" 직접 요청.** 없으면 ③ 생략.
+* 순수 텍스트라 메일 플랫폼과 무관하게 렌더가 안 깨진다.
+
+```
+제목: [QA] {버전} Hotfix 검증 완료 — {VERDICT}
+
+안녕하세요, QA {작성자}입니다.
+{버전} Hotfix 검증 완료되어 결과 공유드립니다.
+
+■ 판정: {VERDICT}
+■ 검증 결과
+  - {Area1}: {1줄 요약} ({PASS/FAIL})
+  - {Area2}: {1줄 요약} ({PASS/FAIL})
+
+■ 결정 필요 (★)         ← 없으면 블록 삭제
+  {이슈 요약 1~2줄}. {결정 요청 내용} 부탁드립니다. (담당: {지목}님)
+
+상세 내용은 첨부 리포트 참고 부탁드립니다.
+```
 
 ## 12.5. 주요 Task 하이라이트 선별 (경영진/유관부서 공유용, 2026-08-04 제정)
 

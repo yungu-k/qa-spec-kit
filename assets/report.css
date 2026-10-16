@@ -1,87 +1,294 @@
-/* ============================================================
-   QA Report — 공용 스타일 (A4 인쇄 전용)
-   규약: REPORT_STYLE_POLICY.md
-   ------------------------------------------------------------
-   이 파일이 리포트 스타일의 유일한 원본이다.
-   - 리포트 HTML 은 클래스만 쓴다. 인라인 style= 금지.
-   - 컴포넌트가 부족하면 여기에 추가한다. 리포트 쪽에서 때우지 않는다.
-   - 팔레트를 바꾸면 대비/색약 검증기를 반드시 재실행한다.
-   ============================================================ */
+/* =======================================================================
+   Report Design System — v1.0 (2026-08-21) · 공개판 2026-10-16
+   원본은 팀 디자이너 세션의 디자인 시스템이다. 고칠 때는 원본과 같이 고친다.
+   대상 매체: A4 인쇄 (headless Edge --print-to-pdf)
+   → 다크모드 · backdrop-filter · 애니메이션 없음. 인쇄에서 살아남는 것만.
 
-@page { size: A4; margin: 18mm 16mm; }
+   검증 완료 항목
+     · 등급 A/B/C/D 팔레트  : 인접쌍 normal dE 21.6 / CVD 20.8  [PASS]
+     · 결과 PASS/FAIL/N-A   : 인접쌍 normal dE 32.3 / CVD 22.6  [PASS]
+     · 칩 텍스트 대비        : 6.0 ~ 8.1 : 1
+   팔레트 변경 시 반드시 재검증:
+     node <dataviz-skill>/scripts/validate_palette.js "#a,#b,#c" --mode light
+   ======================================================================= */
 
-* { box-sizing: border-box; }
+/* --- TOKENS : primitive → semantic --- */
+:root{
+  /* ink — OKLCH 균일 명도 스텝 기준 산출 */
+  --ink-900:#1A1D21; --ink-700:#3A414C; --ink-600:#5A6270;
+  --ink-400:#8D95A3; --ink-300:#C3C9D2; --ink-200:#DEE2E8;
+  --ink-100:#EFF1F4; --ink-050:#F7F8FA; --paper:#FFFFFF;
 
-body {
-  font-family: "IBM Plex Sans", "Malgun Gothic", "맑은 고딕", sans-serif;
-  color: #1c2833;
-  font-size: 10.5pt;
-  line-height: 1.5;
-  margin: 0;
+  /* 브랜드 1색이 일한다 */
+  --brand:#1B4FA0; --brand-600:#2064C8; --brand-tint:#EDF2FB; --brand-rule:#C7D8F2;
+
+  /* 결과 상태 (바 세그먼트용 — 명도차 확보한 세트) */
+  --ok:#2E9E63;  --ok-ink:#14603A;  --ok-tint:#E8F3ED;  --ok-line:#BEDDCC;
+  --bad:#7E1228; --bad-ink:#8A1730; --bad-tint:#FBEAEE; --bad-line:#EFC8D0;
+  --na:#C68A00;  --na-ink:#7A5400;  --na-tint:#FAF1DE;  --na-line:#EAD9AE;
+
+  /* 신뢰도 등급 A/B/C/D (조사 리포트용) */
+  --gA:#1F7A4D; --gA-ink:#14603A; --gA-tint:#E8F3ED; --gA-line:#BEDDCC;
+  --gB:#1B5FBF; --gB-ink:#14479B; --gB-tint:#E7EEFA; --gB-line:#C3D5F2;
+  --gC:#C68A00; --gC-ink:#7A5400; --gC-tint:#FAF1DE; --gC-line:#EAD9AE;
+  --gD:#A01B3C; --gD-ink:#8A1730; --gD-tint:#FBEAEE; --gD-line:#EFC8D0;
+
+  /* 시퀀셜 (계층·비율 — 명도 단조) */
+  --seq-1:#12376F; --seq-2:#2E6BC0; --seq-3:#93B9E6;
+
+  --font:"Malgun Gothic","맑은 고딕",-apple-system,BlinkMacSystemFont,system-ui,
+         "Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+  --mono:Consolas,"D2Coding",ui-monospace,monospace;
 }
 
-/* ---------- 문서 머리 ---------- */
-.title {
-  background: #2C3E50; color: #fff;
-  padding: 14px 18px;
-  font-size: 16pt; font-weight: 700;
-  border-radius: 4px;
+@page{ size:A4; margin:16mm 15mm 14mm }
+*,*::before,*::after{ box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact }
+
+body{
+  font-family:var(--font); color:var(--ink-900); font-size:9.6pt;
+  line-height:1.58; margin:0; text-wrap:pretty; -webkit-font-smoothing:antialiased;
 }
-.subtitle { color: #5D6D7E; font-size: 9.5pt; margin: 6px 2px 18px; }
+p{margin:5px 0} b,strong{font-weight:700}
+ul,ol{margin:5px 0;padding-left:16px} li{margin:2.5px 0} li::marker{color:var(--ink-400)}
+a{ color:var(--brand); text-decoration:none; border-bottom:1px solid var(--brand-rule) }
+code{ font-family:var(--mono); font-size:.92em; font-weight:600; background:var(--ink-050);
+      border:1px solid var(--ink-200); border-radius:3px; padding:.5px 4px; color:var(--ink-700) }
+.pb{page-break-before:always} .nb{page-break-inside:avoid;break-inside:avoid}
+.hint{ color:var(--ink-600); font-size:8.2pt; font-weight:500 }
+.small{ font-size:8pt; color:var(--ink-600) }
 
-h2 {
-  background: #34495E; color: #fff;
-  font-size: 11pt; font-weight: 700;
-  padding: 7px 12px; margin: 22px 0 0;
-  border-radius: 3px;
-}
+/* --- COVER --- */
+.cover{ padding-bottom:12px; margin-bottom:14px; border-bottom:2px solid var(--ink-900) }
+.eyebrow{ font-size:7.4pt; font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+          color:var(--brand); margin-bottom:8px }
+.cover h1{ font-size:22pt; line-height:1.2; font-weight:800; margin:0 0 5px;
+           letter-spacing:-.024em; text-wrap:balance }
+.cover .deck{ font-size:9.8pt; font-weight:500; color:var(--ink-600); margin:0 0 13px; line-height:1.5 }
+.mods{ display:flex; flex-wrap:wrap; gap:5px; margin:0 0 13px }
+.mod{ font-size:7.8pt; font-weight:700; color:var(--ink-700); background:var(--ink-050);
+      border:1px solid var(--ink-200); border-radius:4px; padding:2px 7px;
+      font-variant-numeric:tabular-nums }
+.mod b{ color:var(--brand) }
+.meta{ display:flex; flex-wrap:wrap; gap:4px 24px; font-size:8.2pt }
+.meta div{ display:flex; gap:6px; align-items:baseline }
+.meta dt{ font-weight:800; color:var(--ink-400); text-transform:uppercase;
+          letter-spacing:.07em; font-size:7.1pt }
+.meta dd{ margin:0; font-weight:600; color:var(--ink-700) }
+.toc{ margin-top:16px; border-top:1px solid var(--ink-200); padding-top:11px }
+.toc-t{ font-size:7.4pt; font-weight:800; letter-spacing:.13em; text-transform:uppercase;
+        color:var(--ink-400); margin-bottom:7px }
+.toc ol{ list-style:none; margin:0; padding:0; columns:2; column-gap:26px; font-size:8.6pt }
+.toc li{ margin:2.5px 0; break-inside:avoid; color:var(--ink-700) }
+.toc li b{ color:var(--brand); font-variant-numeric:tabular-nums; margin-right:6px; font-weight:800 }
 
-/* ---------- 표 ---------- */
-table { width: 100%; border-collapse: collapse; margin-top: 0; }
-th, td { border: 1px solid #B3B3B3; padding: 7px 9px; vertical-align: top; }
-th { background: #EAECEE; font-weight: 700; font-size: 9.5pt; }
-td { font-size: 10pt; }
+/* --- VERDICT HERO (사인오프 문서 전용) --- */
+.verdict{ display:flex; margin:0 0 18px; border:1px solid var(--ok-line);
+          border-left:3px solid var(--ok); border-radius:6px; overflow:hidden;
+          page-break-inside:avoid; background:var(--ok-tint) }
+.verdict.is-fail{ border-color:var(--bad-line); border-left-color:var(--bad); background:var(--bad-tint) }
+.verdict.is-hold{ border-color:var(--na-line);  border-left-color:var(--na);  background:var(--na-tint) }
+.verdict .stamp{ flex:none; width:112px; padding:14px 0 15px; text-align:center;
+                 border-right:1px solid var(--ok-line) }
+.verdict.is-fail .stamp{ border-right-color:var(--bad-line) }
+.verdict.is-hold .stamp{ border-right-color:var(--na-line) }
+.verdict .stamp .lbl{ font-size:7pt; font-weight:800; letter-spacing:.15em;
+                      text-transform:uppercase; color:var(--ok-ink); opacity:.75 }
+.verdict .stamp .val{ font-size:27pt; font-weight:800; line-height:1.05;
+                      letter-spacing:-.04em; color:var(--ok-ink); margin-top:2px }
+.verdict.is-fail .stamp .lbl,.verdict.is-fail .stamp .val{ color:var(--bad-ink) }
+.verdict.is-hold .stamp .lbl,.verdict.is-hold .stamp .val{ color:var(--na-ink) }
+.verdict .body{ padding:12px 15px 13px; font-size:9.4pt; line-height:1.55 }
+.verdict .body .hd{ font-weight:800; font-size:10.4pt; color:var(--ok-ink);
+                    margin-bottom:4px; letter-spacing:-.012em }
+.verdict.is-fail .body .hd{ color:var(--bad-ink) }
+.verdict.is-hold .body .hd{ color:var(--na-ink) }
 
-.meta th { width: 18%; text-align: left; }
-.meta td { width: 32%; }
+/* --- 헤딩 --- */
+h2{ display:flex; align-items:baseline; gap:9px; font-size:12.8pt; font-weight:800;
+    letter-spacing:-.02em; margin:24px 0 2px; page-break-after:avoid }
+h2 .num{ font-size:8pt; font-weight:800; color:var(--brand); letter-spacing:.04em;
+         font-variant-numeric:tabular-nums; border:1.2px solid var(--brand-rule);
+         border-radius:4px; padding:1.5px 6px; background:var(--brand-tint); flex:none }
+h2+.rule{ height:1.5px; background:var(--ink-900); margin:0 0 11px; page-break-after:avoid }
+h3{ font-size:10.2pt; font-weight:700; margin:15px 0 5px; letter-spacing:-.012em;
+    page-break-after:avoid }
+h3::before{ content:""; display:inline-block; width:11px; height:1.8px;
+            background:var(--brand); vertical-align:.28em; margin-right:7px }
 
-.area { width: 22%; background: #F7F8F9; font-weight: 700; }
+/* --- 칩 --- */
+.chip{ display:inline-block; min-width:34px; text-align:center; padding:1px 7px;
+       border-radius:4px; font-size:7.8pt; font-weight:800; letter-spacing:.02em;
+       border:1px solid; white-space:nowrap }
+.c-ok{ color:var(--ok-ink); background:var(--ok-tint); border-color:var(--ok-line) }
+.c-bad{ color:var(--bad-ink); background:var(--bad-tint); border-color:var(--bad-line) }
+.c-na{ color:var(--na-ink); background:var(--na-tint); border-color:var(--na-line) }
+.c-info{ color:var(--brand); background:var(--brand-tint); border-color:var(--brand-rule) }
+/* 신뢰도 등급 칩 */
+.g{ display:inline-block; min-width:15px; text-align:center; padding:.5px 5px;
+    border-radius:3.5px; font-size:7.4pt; font-weight:800; letter-spacing:.02em;
+    vertical-align:1.5px; border:1px solid; white-space:nowrap }
+.gA{ color:var(--gA-ink); background:var(--gA-tint); border-color:var(--gA-line) }
+.gB{ color:var(--gB-ink); background:var(--gB-tint); border-color:var(--gB-line) }
+.gC{ color:var(--gC-ink); background:var(--gC-tint); border-color:var(--gC-line) }
+.gD{ color:var(--gD-ink); background:var(--gD-tint); border-color:var(--gD-line) }
+.legend{ display:flex; flex-wrap:wrap; gap:5px 16px; margin-top:9px; padding-top:9px;
+         border-top:1px solid var(--ink-200); font-size:8pt; color:var(--ink-600) }
+.legend span b{ font-weight:600; color:var(--ink-700) }
 
-/* ---------- 판정 배지 ----------
-   Verdict 별 색은 modifier 클래스로 고른다.
-   내용 세션이 hex 를 직접 쓰지 않게 하기 위한 것. */
-.verdict {
-  display: inline-block;
-  padding: 3px 12px; border-radius: 3px;
-  color: #fff; font-weight: 700;
-  background: #999999;              /* 기본 = ON HOLD */
-}
-.verdict.pass       { background: #34A853; }
-.verdict.cond-pass  { background: #FFC107; color: #4A3B00; }
-.verdict.fail       { background: #D11A1A; }
-.verdict.on-hold    { background: #999999; }
+/* --- KPI 타일 --- */
+.kpis{ display:flex; gap:7px; margin:11px 0; page-break-inside:avoid }
+.kpi{ flex:1; display:flex; flex-direction:column; border:1px solid var(--ink-200);
+      border-top:2.5px solid var(--ink-300); border-radius:5px; padding:9px 10px 10px }
+.kpi.k-tot{ border-top-color:var(--ink-900) }
+.kpi.k-ok{ border-top-color:var(--ok) }
+.kpi.k-bad{ border-top-color:var(--bad) }
+.kpi.k-na{ border-top-color:var(--na) }
+.kpi.k-rate{ border-top-color:var(--brand); background:var(--brand-tint); border-color:var(--brand-rule) }
+.kpi .v{ font-size:20pt; font-weight:800; line-height:1; letter-spacing:-.035em;
+         font-variant-numeric:tabular-nums; color:var(--ink-900) }
+.kpi .v small{ font-size:10pt; font-weight:700 }
+.k-ok .v{color:var(--ok-ink)} .k-bad .v{color:var(--bad-ink)}
+.k-na .v{color:var(--na-ink)} .k-rate .v{color:var(--brand)}
+.kpi .k{ font-size:7.6pt; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+         color:var(--ink-600); margin-top:7px }
+.kpi .s{ font-size:7.4pt; color:var(--ink-600); margin-top:auto; padding-top:4px; line-height:1.35 }
 
-/* ---------- 결과 셀 ---------- */
-.res-pass { color: #1E8449; font-weight: 700; text-align: center; }
-.res-fail { color: #CD1C1C; font-weight: 700; text-align: center; }
-.res-na   { color: #7F8C8D; font-weight: 700; text-align: center; }
-.res-nt   { color: #7F8C8D; font-weight: 700; text-align: center; }
+/* 서술형 stat 타일 (조사 리포트용 — 라벨이 긴 경우) */
+.stats{ display:flex; gap:9px; margin:12px 0; page-break-inside:avoid }
+.stat{ flex:1; display:flex; flex-direction:column; border:1px solid var(--ink-200);
+       border-top:2.5px solid var(--brand); border-radius:5px; padding:10px 11px 11px }
+.stat .v{ font-size:22pt; font-weight:800; line-height:1; letter-spacing:-.035em;
+          color:var(--brand); font-variant-numeric:tabular-nums }
+.stat .v small{ font-size:11pt; font-weight:700; margin-left:1px }
+.stat .k{ font-size:8.4pt; font-weight:700; margin-top:7px; line-height:1.35 }
+.stat .s{ font-size:7.6pt; color:var(--ink-600); margin-top:auto; padding-top:5px; line-height:1.35 }
 
-/* ---------- 목록 ---------- */
-ol { margin: 0 0 0 16px; padding: 0; }
-ol li { margin: 2px 0; }
+/* --- 검증 축 스트립 --- */
+.axes{ display:flex; gap:7px; margin:10px 0 11px; page-break-inside:avoid }
+.ax{ flex:1; border:1px solid var(--ink-200); border-radius:5px; padding:7px 10px 8px;
+     display:flex; flex-direction:column; gap:3px }
+.ax .t{ font-size:8.2pt; font-weight:700 }
+.ax .t em{ font-style:normal; color:var(--brand); font-weight:800; margin-right:3px }
+.ax .r{ display:flex; align-items:baseline; gap:7px }
+.ax .v{ font-size:11.5pt; font-weight:800; letter-spacing:-.025em;
+        font-variant-numeric:tabular-nums }
+.ax .v small{ font-size:8.4pt; font-weight:600; color:var(--ink-400) }
 
-/* ---------- 경고 / 결정 요청 블록 ---------- */
-.flag {
-  background: #FEF9E7;
-  border-left: 4px solid #F1C40F;
-  padding: 10px 14px; margin-top: 4px;
-  font-size: 10pt;
-}
-.flag b { color: #B9770E; }
+/* --- 진행 바 (결과 비율) --- */
+.suites{ margin:11px 0 4px; page-break-inside:avoid }
+.srow{ margin-bottom:8px }
+.shd{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px }
+.shd .nm{ font-size:8.6pt; font-weight:700 }
+.shd .ct{ font-size:8pt; color:var(--ink-600); font-variant-numeric:tabular-nums }
+.sbar{ display:flex; height:13px; border-radius:3px; overflow:hidden; background:var(--ink-100) }
+.sseg+.sseg{ box-shadow:inset 2px 0 0 var(--paper) }   /* 2px 표면 간격 — 필수 */
+.sp{background:var(--ok)} .sf{background:var(--bad)} .sn{background:var(--na)}
+.slegend{ display:flex; gap:14px; margin-top:7px; font-size:7.6pt; color:var(--ink-600) }
+.slegend i{ display:inline-block; width:9px; height:9px; border-radius:2px;
+            margin-right:5px; vertical-align:-.5px }
 
-/* ---------- 강조 ---------- */
-.red { color: #D11A1A; }
+/* --- 100% 스택 바 (비율 비교) --- */
+.bars{ margin:12px 0 6px; page-break-inside:avoid }
+.bar-row{ margin-bottom:9px }
+.bar-hd{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3.5px }
+.bar-hd .nm{ font-size:8.6pt; font-weight:700 }
+.bar-hd .note-s{ font-size:7.6pt; color:var(--ink-600) }
+.bar{ display:flex; height:19px; border-radius:3px; overflow:hidden; background:var(--ink-100) }
+.seg{ display:flex; align-items:center; justify-content:center; font-size:8pt; font-weight:800;
+      font-variant-numeric:tabular-nums; color:#fff; letter-spacing:-.01em }
+.seg+.seg{ box-shadow:inset 2px 0 0 var(--paper) }
+.s1{background:var(--seq-1)} .s2{background:var(--seq-2)}
+.s3{ background:var(--seq-3); color:var(--ink-900) }
+.bar-legend{ display:flex; gap:14px; margin-top:8px; font-size:7.8pt; color:var(--ink-600) }
+.bar-legend i{ display:inline-block; width:9px; height:9px; border-radius:2px;
+               margin-right:5px; vertical-align:-.5px }
 
-/* ---------- 꼬리말 ---------- */
-.foot { margin-top: 24px; color: #95A5A6; font-size: 8.5pt; text-align: right; }
+/* --- 표 : 세로줄 없음 --- */
+table{ width:100%; border-collapse:collapse; margin:9px 0 10px; font-size:9.2pt }
+thead th{ text-align:left; font-size:7.5pt; font-weight:800; letter-spacing:.09em;
+          text-transform:uppercase; color:var(--ink-600); padding:0 9px 5px;
+          border-bottom:1.4px solid var(--ink-900) }
+tbody td{ padding:6px 9px; border-bottom:1px solid var(--ink-200); vertical-align:top }
+tbody tr:last-child td{ border-bottom:1.4px solid var(--ink-900) }
+tbody tr{ page-break-inside:avoid }
+td.n,th.n{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap }
+td.c{ text-align:center }
+td.area{ font-weight:700 }
+td.area span{ display:block; font-weight:500; font-size:7.8pt; color:var(--ink-600); margin-top:2px }
+td ol,td ul{ margin:0; padding-left:15px }
+.tag{ display:inline-block; font-size:7.6pt; font-weight:800; color:var(--brand);
+      font-variant-numeric:tabular-nums; margin-right:5px }
+.ver{ font-variant-numeric:tabular-nums; font-weight:700; white-space:nowrap }
+.ver .old{ color:var(--ink-400); font-weight:600 }
+.ver .arw{ color:var(--ink-300); margin:0 5px; font-weight:400 }
+.ver .new{ color:var(--brand) }
+
+/* --- 정의 그리드 --- */
+.kv{ display:grid; grid-template-columns:auto 1fr auto 1fr; border:1px solid var(--ink-200);
+     border-radius:5px; overflow:hidden; margin:9px 0; font-size:9pt }
+.kv dt{ background:var(--ink-050); font-size:7.4pt; font-weight:800; letter-spacing:.08em;
+        text-transform:uppercase; color:var(--ink-600); padding:6px 10px;
+        border-bottom:1px solid var(--ink-200); border-right:1px solid var(--ink-200); white-space:nowrap }
+.kv dd{ margin:0; padding:6px 12px; font-weight:600; border-bottom:1px solid var(--ink-200);
+        border-right:1px solid var(--ink-200) }
+.kv dd:nth-child(4n){ border-right:none }
+.kv dt:nth-last-child(-n+4),.kv dd:nth-last-child(-n+4){ border-bottom:none }
+
+/* --- 콜아웃 : 색 + 라벨 (색 단독 금지) --- */
+.note{ margin:9px 0; padding:8px 12px 9px; font-size:9.2pt; line-height:1.55; page-break-inside:avoid }
+.note .lbl{ display:block; font-size:7.1pt; font-weight:800; letter-spacing:.13em;
+            text-transform:uppercase; margin-bottom:4px }
+.n-info,.lead{ background:var(--brand-tint); border-left:2.5px solid var(--brand) }
+.n-info .lbl,.lead .lbl{ color:var(--brand) }
+.n-ok,.ours{ background:var(--gA-tint); border-left:2.5px solid var(--gA) }
+.n-ok .lbl,.ours .lbl{ color:var(--gA-ink) } .ours b{ color:var(--gA-ink) }
+.n-warn,.warn{ background:var(--na-tint); border-left:2.5px solid var(--na) }
+.n-warn .lbl,.warn .lbl{ color:var(--na-ink) } .warn b{ color:var(--na-ink) }
+.n-flat,.keyline{ background:var(--ink-050); border-left:2.5px solid var(--ink-600) }
+.n-flat .lbl,.keyline .lbl{ color:var(--ink-600) }
+.foot-note{ font-size:7.8pt; color:var(--ink-600); margin:-4px 0 10px; line-height:1.5 }
+
+/* --- 2열 비교 카드 --- */
+.split{ display:flex; gap:10px; margin:11px 0; page-break-inside:avoid }
+.split>div{ flex:1; border:1px solid var(--ink-200); border-radius:5px; padding:10px 12px 11px }
+.split .hd{ font-size:8.4pt; font-weight:800; margin-bottom:6px; padding-bottom:5px;
+            border-bottom:1px solid var(--ink-200) }
+.can{ border-top:2.5px solid var(--gA) }  .can .hd{ color:var(--gA-ink) }
+.cant{ border-top:2.5px solid var(--ink-600) } .cant .hd{ color:var(--ink-700) }
+.split ul{ margin:0; padding-left:14px; font-size:9pt }
+
+/* --- 판단 블록 (담당이 다른 항목은 분리) --- */
+.decision{ border:1px solid var(--ink-200); border-radius:6px; overflow:hidden; page-break-inside:avoid }
+.decision .top{ background:var(--ok-tint); border-bottom:1px solid var(--ok-line);
+                padding:11px 14px 12px; font-size:9.4pt; line-height:1.55 }
+.decision .top .hd{ font-size:11pt; font-weight:800; color:var(--ok-ink);
+                    margin-bottom:4px; letter-spacing:-.015em }
+.block{ padding:10px 14px 11px; border-bottom:1px solid var(--ink-200) }
+.block:last-child{ border-bottom:none }
+.block .bh{ display:flex; align-items:center; gap:7px; font-size:8.6pt; font-weight:800; margin-bottom:5px }
+.block .bh .dot{ width:7px; height:7px; border-radius:50%; flex:none }
+.block ul{ margin:0; padding-left:15px; font-size:9.2pt }
+.b-check .bh{color:var(--na-ink)}  .b-check .dot{background:var(--na)}
+.b-watch .bh{color:var(--brand)}   .b-watch .dot{background:var(--brand)}
+.b-ops   .bh{color:var(--ink-700)} .b-ops   .dot{background:var(--ink-600)}
+
+/* --- 결론 패널 (강조가 필요한 마무리) --- */
+.final{ background:var(--ink-900); color:#fff; border-radius:6px; padding:16px 19px 17px;
+        margin-top:10px; page-break-inside:avoid }
+.final .lbl{ font-size:7.2pt; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+             color:var(--ink-400); margin-bottom:8px }
+.final .top{ font-size:12pt; font-weight:800; line-height:1.42; letter-spacing:-.018em; margin-bottom:12px }
+.final ol{ margin:0; padding:0; list-style:none; counter-reset:f }
+.final li{ counter-increment:f; position:relative; padding-left:23px; font-size:9.6pt;
+           line-height:1.5; margin:6px 0; color:#E9ECF1 }
+.final li::before{ content:counter(f); position:absolute; left:0; top:.5px; width:15px; height:15px;
+                   border-radius:50%; background:rgba(255,255,255,.14); font-size:7.6pt;
+                   font-weight:800; display:flex; align-items:center; justify-content:center; color:#fff }
+.final li b{ color:#fff }
+.final .kicker{ margin-top:13px; padding-top:11px; border-top:1px solid rgba(255,255,255,.16);
+                font-size:9.8pt; font-weight:700; color:#fff }
+
+.next{ margin-top:12px; padding:9px 12px; border:1px dashed var(--ink-300); border-radius:5px;
+       font-size:8.6pt; color:var(--ink-700); background:var(--ink-050) }
+.foot{ margin-top:20px; padding-top:9px; border-top:1px solid var(--ink-200);
+       color:var(--ink-400); font-size:7.8pt; text-align:right; letter-spacing:.03em }
