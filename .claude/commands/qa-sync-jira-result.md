@@ -21,7 +21,7 @@ Jira 티켓 상태 기반 Google Sheets TC 시트 Test Result 업데이트.
 
 1. **대상 시트 식별:** 스프레드시트 내 모든 **"Full Test Case" 시트 + "Regression Test Case" 시트** 대상. (Smoke Test, QA Plan, QA Result, QA Status 등 제외)
 
-2. **Fail TC 수집:** 각 TC 시트에서 Test Result(I열)="Fail" + Comment(J열)에 Jira 이슈 키(CAS-XXXX) 있는 행 수집.
+2. **Fail TC 수집:** 각 TC 시트에서 Test Result(I열)="Fail" + Comment(J열)에 Jira 이슈 키(PROJ-XXXX) 있는 행 수집.
 
 3. **Jira 상태 조회:** 수집된 Jira 이슈 키 현재 상태를 MCP `jira_get_issue` 또는 `jira_search`로 일괄 조회. **페이지네이션 필수:** next_page_token 있으면 전체 페이지 순회.
 

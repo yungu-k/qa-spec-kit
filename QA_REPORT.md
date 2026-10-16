@@ -371,7 +371,7 @@ QA 진행 중 실시간 현황 공유 리포트 Google Sheets 작성. 시트명 
 | 14 | 동일 머지 | 값 | Priority 글자색 (P0=Red, P1=Orange, P2=Gold, P3=Green), 12pt bold |
 
 * **Resolution Rate:** `(Closed + Reject) / Total` — 백분율 `0.0%` 포맷, Blue bold
-* **Comment (K14):** Priority 특기사항 (예: "P0 1건 Open (CAS-XXXX)"), 9pt wrap
+* **Comment (K14):** Priority 특기사항 (예: "P0 1건 Open (PROJ-XXXX)"), 9pt wrap
 
 #### Section 3: Open & Reopened Defects (Row 15~)
 
