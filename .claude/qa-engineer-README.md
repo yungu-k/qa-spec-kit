@@ -4,7 +4,7 @@ QA 팀의 **동료 QA 엔지니어**(Claude subagent). 사람 QA(공윤구)의 �
 기획자([[planner]])와 대칭: 기획자="무엇을 만들까", QA="무엇이 깨질까·무엇을 검증할까".
 
 ## 부르는 법
-- 이 디렉토리(`Desktop\QA\AI`)에서 Claude Code 실행 → `qa-engineer` subagent 자동 인식.
+- 이 저장소를 연 디렉토리에서 Claude Code 실행 → `qa-engineer` subagent 자동 인식.
 - 또는 Agent 도구로 `subagent_type: "qa-engineer"` 지정.
 
 ## 무엇을 시키나 (3대 역할)
