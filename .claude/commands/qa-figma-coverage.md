@@ -3,7 +3,7 @@
 Figma 디자인 변경 감지, TC 시트 비교, 커버리지 갭 리포트.
 
 ## 입력
-- `$ARGUMENTS`: 대상 프로젝트 (`MRK` 또는 `LSK` 또는 `all`)
+- `$ARGUMENTS`: 대상 프로젝트 (`PRJA` 또는 `PRJB` 또는 `all`)
   - 미입력시 `all`
 
 ## 처리 절차
@@ -33,12 +33,12 @@ Figma 디자인 변경 감지, TC 시트 비교, 커버리지 갭 리포트.
 
 | 프로젝트 | 페이지 ID | 페이지명 |
 |---|---|---|
-| MRK | 2207:14776 | 사용자_멤버십 |
-| MRK | 3815:2102 | 어드민콘솔_멤버십 |
-| MRK | 1498:9915 | Platform_멤버십 |
-| LSK | 2207:14777 | 사용자_짐보관 |
-| LSK | 3815:9168 | 어드민콘솔_짐보관 |
-| LSK | 2735:830 | Platform_짐보관 |
+| PRJA | <node-id> | 사용자_멤버십 |
+| PRJA | <node-id> | 어드민콘솔_멤버십 |
+| PRJA | <node-id> | Platform_멤버십 |
+| PRJB | <node-id> | 사용자_짐보관 |
+| PRJB | <node-id> | 어드민콘솔_짐보관 |
+| PRJB | <node-id> | Platform_짐보관 |
 
 ## Figma 연동
 - **토큰:** `figma-token.json` (Personal Access Token)
