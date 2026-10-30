@@ -17,6 +17,10 @@ tc_lint.py — TC 표의 금지 패턴·꼴 검사기 (표준 라이브러리만
   python3 tools/tc_lint.py tc.json --col-pre pre --col-step step --col-exp exp --col-title title
   python3 tools/tc_lint.py TC_QUICKSTART.md --md-heading '고친 예'   # 그 제목 아래 표만
   python3 tools/tc_lint.py tc.csv --screen-text strings.txt          # 「」 인용·[버튼] 이 화면 문구 목록에 있나
+  python3 tools/tc_lint.py --self-test --disable S10                 # 규칙을 끄면 self-test 가 빨강이 되나(규칙이 살아 있나)
+
+Comment 열이 있으면 읽는다: [확인 필요] 는 Comment 에서만 허용(S10), 다른 행 참조(S12)·조건부 규칙의
+세 경우(S13)는 Comment 까지 본다. Comment 에는 금지 패턴(F*)을 걸지 않는다 — 기술 정보가 갈 자리다.
 
 종료 코드: 0 = 위반 0 · 1 = 위반 있음(또는 self-test 실패) · 2 = 입력을 못 읽음/검사할 행 0
 행이 0 이면 통과가 아니라 2 다 — 빈 집합의 집계는 늘 통과 쪽으로 기운다.
@@ -42,6 +46,7 @@ ALIASES = {
     "pre": ["Pre-Condition", "Pre", "pre", "precondition", "사전 조건"],
     "step": ["Test Step", "Step", "step", "steps"],
     "exp": ["Expected Result", "Expected", "exp", "expected"],
+    "comment": ["Comment & Jira link", "Comment", "comment", "비고"],
 }
 
 # ---------------------------------------------------------------- 금지 패턴 (Pre/Step/Expected 세 칸)
@@ -81,7 +86,26 @@ STEP_ONLY = [
 # Expected 칸에만 거는 것
 EXP_ONLY = [
     ("S9", "주관 판정어", re.compile(r"정상\s*(?:동작|작동|처리|적으로)|올바르게|문제\s*없이|잘\s*(?:된다|동작)")),
+    # 눈대중 낱말 — 비교 기준(「다른 줄 글자와 같은 위치에서 시작한다」)으로 바꿔 쓴다
+    ("S11", "눈대중 낱말(비교 기준을 적는다)",
+     re.compile(r"빈틈\s*없이|적당(?:히|한)|자연스럽|깔끔하|매끄럽|부드럽게|보기\s*좋게|어색하지\s*않|"
+                r"알맞(?:게|은)|적절(?:히|한)|제대로|대략|어느\s*정도|무난하")),
 ]
+
+# 확정 표의 Pre/Step/Expected 에 남은 [확인 필요] — 수행자는 그 줄이 판정 대상인지 모른다
+UNCONFIRMED_RULE = ("S10", "확정 표의 Pre/Step/Expected 에 [확인 필요] — 해소하거나 Comment 로 옮긴다")
+
+# 행끼리 참조 — 「위 행과 같다」「PAY-002 Comment 참고」. 한 행이 모호하면 기댄 행이 다 같이 모호해진다
+REF_PHRASE_RE = re.compile(r"위\s*행|앞\s*행|아래\s*행|다른\s*행|윗\s*줄\s*TC|상동|위와\s*(?:같|동일)|앞\s*TC|이전\s*TC")
+REF_WORD_RE = re.compile(r"참고|참조|(?:와|과)\s*같|(?:와|과)\s*동일|처럼|(?:에|을|를)\s*따라|(?<!그)대로")
+
+# 조건부 수행 규칙 — 「A 가 Fail 이면 …」은 Pass/Fail/N/T 세 경우를 다 적는다
+COND_RE = re.compile(r"(?:Pass|Fail|N/T)\s*(?:이면|면|일\s*때|인\s*경우|라면)")
+COND_NEED = ("Pass", "Fail", "N/T")
+
+# 클릭 직후 포커스 테두리가 선택 표시와 헷갈리는 곳 — Step 에 포커스를 빼는 조작이 있는지 사람이 본다
+LOOK_RE = re.compile(r"테두리|강조|선택\s*표시|선택된|밑줄|외곽선")
+UNFOCUS_RE = re.compile(r"포커스를?\s*(?:뺀다|뺀|없앤다)|빈\s*곳을\s*(?:누른다|눌러)")
 
 TYPES = ("콘텐츠 검증", "기본 동작", "예외 사항", "안전")
 TITLE_RE = re.compile(r"^(%s) · (.+?) → (.+)$" % "|".join(TYPES))
@@ -124,6 +148,37 @@ def lint_row(row, cfg):
     """row: dict(id,title,pre,step,exp) → [(칸, 규칙, 설명, 발췌)]"""
     issues = []
     pre, step, exp, title = row.get("pre", ""), row.get("step", ""), row.get("exp", ""), row.get("title", "")
+    comment = row.get("comment", "")
+
+    # ---- 확정 표에 [확인 필요] (Comment 는 허용)
+    for col, cell in (("Pre", pre), ("Step", step), ("Expected", exp)):
+        if UNCONFIRMED in (cell or ""):
+            issues.append((col, UNCONFIRMED_RULE[0], UNCONFIRMED_RULE[1], UNCONFIRMED))
+
+    # ---- 행끼리 참조(자기완결) · 조건부 규칙 세 경우
+    own = (row.get("id") or "").strip()
+    others = [i for i in getattr(cfg, "all_ids", ()) if i and i != own]
+    for col, cell in (("Pre", pre), ("Step", step), ("Expected", exp), ("Comment", comment)):
+        cell = cell or ""
+        m = REF_PHRASE_RE.search(cell)
+        if m:
+            issues.append((col, "S12", "다른 행을 참조한다 — 필요한 안내는 이 행에 직접, 공통 안내는 표 머리에", m.group(0)))
+        else:
+            hit = [o for o in others if re.search(r"(?<![\w-])%s(?![\w-])" % re.escape(o), cell)]
+            # 표에 없는 행이라도 같은 모듈 번호(LOAN-011 ↔ LOAN-012)면 다른 행이다
+            mod = re.match(r"([A-Za-z][\w]*)-\d+$", own)
+            if mod:
+                hit += [x for x in re.findall(r"(?<![\w-])%s-\d+(?![\w-])" % re.escape(mod.group(1)), cell)
+                        if x != own]
+                hit = list(dict.fromkeys(hit))
+            if hit and REF_WORD_RE.search(cell):
+                issues.append((col, "S12", "다른 행을 참조한다 — 필요한 안내는 이 행에 직접, 공통 안내는 표 머리에",
+                               ",".join(hit)))
+        if COND_RE.search(cell):
+            lack = [w for w in COND_NEED if w not in cell]
+            if lack:
+                issues.append((col, "S13", "조건부 수행 규칙에 빠진 경우: %s (Pass/Fail/N/T 를 다 적는다)" % "·".join(lack),
+                               COND_RE.search(cell).group(0)))
 
     # ---- 금지 패턴
     for col, cell in (("Pre", pre), ("Step", step), ("Expected", exp)):
@@ -201,6 +256,10 @@ def lint_row(row, cfg):
             warns.append(("Expected", "W1", "「요청이 이뤄진다」는 밖에서 확인되는 것(영수증 등)만", ln))
     if DEV_LABEL in (step or "") or DEV_LABEL in (pre or ""):
         warns.append(("Step", "W2", "(개발자) 행 — 화면 없는 순수 API 기능인지 사람이 본다", ""))
+    m = LOOK_RE.search(exp or "")
+    if m and not UNFOCUS_RE.search(step or ""):
+        warns.append(("Expected", "W3", "테두리·강조를 판정한다 — 누른 직후 포커스 테두리와 헷갈리면 Step 에 「빈 곳을 눌러 포커스를 뺀다」",
+                      m.group(0)))
     if cfg.screen_text is not None:
         for col, cell in (("Expected", exp),):
             for m in QUOTE_RE.finditer(cell or ""):
@@ -216,7 +275,8 @@ def lint_row(row, cfg):
                     continue
                 if b not in cfg.screen_text:
                     issues.append((col, "T2", "화면 문구 목록에 없는 버튼 이름", "[%s]" % b))
-    return issues, warns
+    off = getattr(cfg, "disabled", ())
+    return [i for i in issues if i[1] not in off], [w for w in warns if w[1] not in off]
 
 
 # ---------------------------------------------------------------- 입력
@@ -288,17 +348,19 @@ def load(path, fmt, heading_re):
 def normalize(raw_rows, args):
     if not raw_rows:
         return []
-    names = list(raw_rows[0].keys())
-    col = {k: pick(names, k, getattr(args, "col_" + k)) for k in ALIASES}
-    missing = [k for k in ("pre", "step", "exp") if not col[k]]
     rows = []
     for idx, r in enumerate(raw_rows, 1):
+        # 열은 행마다 고른다 — md 에선 표마다 열이 다르다(앞 표에 Comment 가 없어도 뒤 표 것은 읽는다)
+        names = list(r.keys())
+        col = {k: pick(names, k, getattr(args, "col_" + k)) for k in ALIASES}
+        missing = [k for k in ("pre", "step", "exp") if not col[k]]
         if missing:
             continue  # md 의 다른 표(예: 규칙 표)는 건너뛴다
         rows.append({
             "id": (r.get(col["id"]) if col["id"] else "") or "#%d" % idx,
             "title": r.get(col["title"], "") if col["title"] else "",
             "pre": r.get(col["pre"], ""), "step": r.get(col["step"], ""), "exp": r.get(col["exp"], ""),
+            "comment": r.get(col["comment"], "") if col["comment"] else "",
             "_has_title": bool(col["title"]),
         })
     return rows
@@ -307,10 +369,11 @@ def normalize(raw_rows, args):
 # ---------------------------------------------------------------- 실행·보고
 def run(rows, cfg, out=sys.stdout):
     total_err, form_bad, pat_hits, warn_n, unconfirmed = 0, 0, 0, 0, 0
+    cfg.all_ids = [r["id"] for r in rows if not r["id"].startswith("#")]
     for r in rows:
         cfg.check_title = r.get("_has_title", True) and not cfg.no_title
         issues, warns = lint_row(r, cfg)
-        unconfirmed += sum((r.get(k) or "").count(UNCONFIRMED) for k in ("pre", "step", "exp"))
+        unconfirmed += (r.get("comment") or "").count(UNCONFIRMED)
         if any(i[1].startswith("S") for i in issues):
             form_bad += 1
         pat_hits += sum(1 for i in issues if i[1].startswith(("F", "T")))
@@ -322,7 +385,7 @@ def run(rows, cfg, out=sys.stdout):
         warn_n += len(warns)
     n = len(rows)
     rate = 100.0 * (n - form_bad) / n if n else 0.0
-    print("— 행 %d · 금지 패턴 %d · 꼴 준수 %d/%d (%.1f%%) · 경고 %d · [확인 필요] %d"
+    print("— 행 %d · 금지 패턴 %d · 꼴 준수 %d/%d (%.1f%%) · 경고 %d · Comment 의 [확인 필요] %d"
           % (n, pat_hits, n - form_bad, n, rate, warn_n, unconfirmed), file=out)
     failed = total_err > 0 or (cfg.strict and warn_n > 0)
     return failed, total_err
@@ -337,6 +400,8 @@ class Cfg:
     no_title = False
     check_title = True
     screen_text = None
+    all_ids = ()
+    disabled = ()
 
 
 # ---------------------------------------------------------------- self-test
@@ -351,6 +416,12 @@ CLEAN = [
     {"id": "C-3", "title": "안전 · 덮개 열림 → 대출 중단",
      "pre": "1. 대출 목록 화면 진입 상태\n2. 본체 덮개가 열려 있는 상태",
      "step": "1. [대출하기] 를 누른다.", "exp": "1. 점검 중 안내 화면으로 바뀐다.\n2. 영수증 출력 요청이 이뤄진다."},
+    # Comment 의 [확인 필요]·세 경우를 다 적은 조건부 규칙·다른 행 결과에 기대는 조건(참조 낱말 없음)은 허용
+    {"id": "C-4", "title": "기본 동작 · 책 줄 누름 → 선택 표시",
+     "pre": "1. 대출 목록 화면 진입 상태\n2. 받침대에 책 두 권을 올린 상태",
+     "step": "1. 첫 번째 책 줄을 누른다.\n2. 목록 아래 빈 곳을 눌러 포커스를 뺀다.",
+     "exp": "1. 첫 번째 줄 왼쪽 칸에만 ✓ 표시가 보인다.\n2. 두 줄의 제목 글자가 같은 위치에서 시작한다.",
+     "comment": "선택 표시 색은 [확인 필요]. C-1 이 Pass 이면 그대로 수행, Fail 이면 이 행도 Fail, N/T 이면 이 행도 N/T"},
 ]
 # (기대 규칙, 행) — 행마다 **그 규칙 하나**를 일부러 어긴다
 DIRTY = [
@@ -382,13 +453,29 @@ DIRTY = [
     ("T1", {"pre": "1. 대출기 첫 화면 진입 상태", "step": "1. 회원증을 댄다.",
             "exp": "1. 「어서 오세요, 회원님」 안내가 보인다."}),
     ("T2", {"pre": "1. 대출 목록 화면 진입 상태", "step": "1. [바로 대출] 을 누른다.", "exp": "1. 목록이 보인다."}),
+    ("S10", {"pre": "1. 대출기 첫 화면 진입 상태", "step": "1. 회원증을 댄다.",
+             "exp": "1. 「대출할 책을 올려 주세요」 안내가 보인다.\n2. 안내 아래 남은 권수가 보인다 [확인 필요]."}),
+    ("S10", {"pre": "1. [확인 필요] 회원 등급이 정지인 상태", "step": "1. 회원증을 댄다.", "exp": "1. 목록이 보인다."}),
+    ("S11", {"pre": "1. 대출 목록 화면 진입 상태", "step": "1. 책을 받침대에 올린다.",
+             "exp": "1. 책 제목이 목록에 빈틈 없이 붙는다."}),
+    ("S11", {"pre": "1. 대출 목록 화면 진입 상태", "step": "1. 책을 받침대에 올린다.",
+             "exp": "1. 목록이 자연스럽게 내려간다."}),
+    ("S12", {"pre": "1. 대출 목록 화면 진입 상태", "step": "1. 책을 받침대에 올린다.", "exp": "1. 목록이 보인다.",
+             "comment": "세팅 방법은 C-2 Comment 참고"}),
+    ("S12", {"pre": "1. 대출 목록 화면 진입 상태", "step": "1. 책을 받침대에 올린다.", "exp": "1. 위 행과 같은 결과가 보인다."}),
+    ("S13", {"pre": "1. 대출 목록 화면 진입 상태", "step": "1. 책을 받침대에 올린다.", "exp": "1. 목록이 보인다.",
+             "comment": "C-1 이 Fail 이면 이 행은 반납 화면에서 한다"}),
 ]
 SELFTEST_SCREEN = "대출할 책을 올려 주세요\n연체 도서가 있어 대출할 수 없습니다\n대출하기\n잠금\n해제\n초기화\n재시작\n"
 
 
-def self_test():
+def self_test(disabled=()):
     cfg = Cfg()
     cfg.screen_text = SELFTEST_SCREEN
+    cfg.all_ids = [r["id"] for r in CLEAN]
+    cfg.disabled = tuple(disabled)
+    if disabled:
+        print("(--disable %s — 이 규칙을 끈 검사기로 돈다. 아래가 실패해야 그 규칙이 제 몫을 한다)" % ",".join(disabled))
     ok = True
     print("[1] 깨끗한 더미 %d행 — 위반 0 이어야 한다" % len(CLEAN))
     for r in CLEAN:
@@ -400,6 +487,7 @@ def self_test():
     for rid, r in DIRTY:
         r = dict(r)
         r.setdefault("title", "기본 동작 · 회원증 인식 → 목록")
+        r.setdefault("id", "D-%s" % rid)
         issues, _ = lint_row(r, cfg)
         got = sorted({i[1] for i in issues})
         hit = rid in got
@@ -434,10 +522,15 @@ def main(argv=None):
     ap.add_argument("--no-title", action="store_true", help="소분류 검사를 끈다")
     ap.add_argument("--screen-text", help="화면 문구 원문 파일 — Expected 의 「」 인용과 Step·Expected 의 [버튼] 이 이 안에 글자 그대로 있어야 한다")
     ap.add_argument("--strict", action="store_true", help="경고도 실패로 센다")
+    ap.add_argument("--disable", default="",
+                    help="--self-test 전용: 이 규칙(쉼표로 여럿)을 끈 채 self-test 를 돌린다 — 실패가 나와야 그 규칙이 살아 있다")
     a = ap.parse_args(argv)
 
+    disabled = [x.strip() for x in a.disable.split(",") if x.strip()]
+    if disabled and not a.self_test:
+        ap.error("--disable 은 --self-test 와만 쓴다(실제 표 검사에서 규칙을 끄는 문은 없다)")
     if a.self_test:
-        return 0 if self_test() else 1
+        return 0 if self_test(disabled) else 1
     if not a.file:
         ap.error("파일을 주거나 --self-test")
     cfg = Cfg()
