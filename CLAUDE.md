@@ -1,7 +1,7 @@
 ---
 status: active
 owner: QA
-updated: 2026-08-24
+updated: 2026-10-30
 ---
 
 # [Index] QA Automation Project — Domain Entry Point
@@ -10,6 +10,7 @@ updated: 2026-08-24
 | :--- | :--- | :--- | :--- |
 | 1.0 | 2026-04-14 | QA Engineer | 진입점 문서 분리 — 본문 도메인별 md 분산. CLAUDE.md 인덱스 역할만, Claude Code 자동 로드 컨텍스트 경량화 |
 | 1.1 | 2026-08-24 | QA Engineer | 도메인 3종 신설 등재 — `VERIFICATION_GUIDE.md`(검증 방법론) · `REPORT_STYLE_POLICY.md`(내용/스타일 분리, 2026-08-21 확정) · `SESSION_ROLES.md`(5개 세션 역할). §5 에 push 범위·커밋 메시지·한글 파일 치환 규칙 추가 |
+| 1.2 | 2026-10-30 | QA Engineer | TC 설계 키트 2판 등재 — `TC_QUICKSTART.md`(TC 문체 정본) · `tools/tc_lint.py`(금지 패턴·꼴 검사) · `.claude/skills/tc-design/`(입력→초안→반증 라운드→lint 스킬) |
 
 ---
 
@@ -25,7 +26,8 @@ updated: 2026-08-24
 
 | 도메인 | 규격 파일 | 적용 시점 |
 | :--- | :--- | :--- |
-| **TC 설계 + Bug Report** | [`TC_DESIGN_GUIDE.md`](./TC_DESIGN_GUIDE.md) | Figma → TC 설계, Jira 버그 등록 시 |
+| **TC 설계 — 시작 한 장 (문체 정본)** | [`TC_QUICKSTART.md`](./TC_QUICKSTART.md) · [`tools/tc_lint.py`](./tools/tc_lint.py) · [`.claude/skills/tc-design/`](./.claude/skills/tc-design/SKILL.md) | 기획 문서 + 코드로 TC 를 **새로 쓸 때**. 칸 규칙·반증 라운드·금지 패턴 검사 |
+| **TC 설계 + Bug Report** | [`TC_DESIGN_GUIDE.md`](./TC_DESIGN_GUIDE.md) | Figma → TC 설계, 시트 서식, Jira 버그 등록 시 |
 | **QA 리포팅 (Result + Status + PDF 템플릿)** | [`QA_REPORT.md`](./QA_REPORT.md) | QA 종료 보고(Sign-off), 진행 중 현황 보고, Sign-off·Hotfix·UAT PDF 리포트 산출(§11.4 템플릿) 시 |
 | **검증 방법론 (검사가 실제로 보고 있나)** | [`VERIFICATION_GUIDE.md`](./VERIFICATION_GUIDE.md) | 테스트·감사·자동화 검사를 **새로 쓸 때**, 남의 검증 결과를 **재확인할 때**, 무변경 리팩터를 증명할 때 |
 | **리포트 스타일 규약 (내용/스타일 분리)** | [`REPORT_STYLE_POLICY.md`](./REPORT_STYLE_POLICY.md) · [`assets/report.css`](./assets/report.css) | 리포트·문서를 **발행**하기 직전. 스타일을 직접 짜고 싶어질 때 |
@@ -53,7 +55,8 @@ updated: 2026-08-24
 ```
 qa-spec-kit/
 ├── CLAUDE.md                          # 본 파일 (Index, 자동 로드)
-├── TC_DESIGN_GUIDE.md                 # TC 설계 + Bug Report 규격
+├── TC_QUICKSTART.md                   # TC 설계 키트 2판 — 한 장 시작 (TC 문체 정본)
+├── TC_DESIGN_GUIDE.md                 # TC 설계 + Bug Report 규격 (분류·서식·근거)
 ├── QA_REPORT.md                       # QA Result + QA Status 리포팅 규격 + PDF 리포트 HTML 템플릿(§11.4)
 ├── VERIFICATION_GUIDE.md              # 검증 방법론 — 검사가 실제로 보고 있는가
 ├── REPORT_STYLE_POLICY.md             # 리포트 내용/스타일 분리 규약
@@ -63,10 +66,14 @@ qa-spec-kit/
 │   └── report.css                     # 리포트 공용 스타일 (A4 인쇄 전용) — 스타일의 유일한 원본
 ├── state/
 │   └── qa-engineer-focus.md           # 가변 상태 템플릿 (헌법과 유효기간이 다름)
+├── tools/
+│   ├── tc_lint.py                     # TC 표 금지 패턴·꼴 검사 (--self-test 먼저)
+│   └── hooks/pre-commit               # 공개 저장소 반출 검사 훅
 └── .claude/
     ├── agents/
     │   └── qa-engineer.md             # QA 엔지니어 페르소나(subagent)
     ├── skills/                        # advise-test-coverage · write-unit-tests · diff-driven-test (각 SKILL+TEMPLATE+EXAMPLE)
+    │   └── tc-design/                 # 기획+코드 → TC (SKILL + TEMPLATE·AUDITOR_BRIEF·EXAMPLE)
     ├── qa-engineer-README.md          # QA 엔지니어 사용법
     └── commands/                      # 재사용 슬래시 커맨드
 ```
