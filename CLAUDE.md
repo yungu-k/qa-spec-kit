@@ -12,6 +12,7 @@ updated: 2026-10-30
 | 1.1 | 2026-08-24 | QA Engineer | 도메인 3종 신설 등재 — `VERIFICATION_GUIDE.md`(검증 방법론) · `REPORT_STYLE_POLICY.md`(내용/스타일 분리, 2026-08-21 확정) · `SESSION_ROLES.md`(5개 세션 역할). §5 에 push 범위·커밋 메시지·한글 파일 치환 규칙 추가 |
 | 1.2 | 2026-10-30 | QA Engineer | TC 설계 키트 2판 등재 — `TC_QUICKSTART.md`(TC 문체 정본) · `tools/tc_lint.py`(금지 패턴·꼴 검사) · `.claude/skills/tc-design/`(입력→초안→반증 라운드→lint 스킬) |
 | 1.3 | 2026-10-30 | QA Engineer | TC 설계 키트 2판 보강(깨끗한 환경 시험 반영) — 실행 화면 관찰(캡처) 입력 단계, 반증 두 갈래(소스 대조 + 수행: 모호 0·불가 0), `tc_lint` S10~S13(확정 표 `[확인 필요]`·눈대중 낱말·행 참조·조건부 규칙 세 경우) |
+| 1.4 | 2026-10-30 | QA Engineer | TC 키트 2회차 시험 반영 — Pre 는 Expected 가 기대는 상태를 전부(개수+속성), Expected 는 나머지 항목을 닫는다, 수행 반증 Pre 반례 검사 필수·엄격 기준, 불가 vs 도구 한계 분리, `tc_lint` W4(경고) |
 
 ---
 

@@ -107,6 +107,16 @@ COND_NEED = ("Pass", "Fail", "N/T")
 LOOK_RE = re.compile(r"테두리|강조|선택\s*표시|선택된|밑줄|외곽선")
 UNFOCUS_RE = re.compile(r"포커스를?\s*(?:뺀다|뺀|없앤다)|빈\s*곳을\s*(?:누른다|눌러)")
 
+# Expected 가 항목의 개수·상태 표시를 판정하는데 Pre 가 그 상태를 안 적었다 — 앞 행에서 이어 하면 다른 상태라
+# Expected 가 어긋난다(2회차 시험: 「항목 N개가 있는 상태」만 적고 Expected 는 「전부 미완료」일 때만 맞았다).
+# 「」 인용은 화면 문구라 빼고 본다(「결제가 완료되었습니다」의 「완료」는 상태 판정이 아니다).
+# 맨 「완료」는 안 잡는다 — 「반납 완료 영수증」처럼 이름에 붙은 완료가 오탐이 된다. 상태로 쓴 꼴만.
+EXP_STATE_RE = re.compile(r"✓|체크|표시가|선택|미완료|완료(?:된|됨|로\s*표시)|잠[겨긴김]|\d+\s*(?:개|줄|권|건|장|명|칸)|"
+                          r"(?:한|두|세|네|다섯|여섯)\s*(?:개|줄|권|건|장|명|칸)")
+PRE_STATE_RE = re.compile(r"✓|체크|표시|선택|완료|잠[겨긴김]|모두|전부|어느\s*\S+도|하나도|없는|"
+                          r"켜[진져]|꺼[진져]|열[린려]|닫[힌혀]")
+QUOTED_ANY_RE = re.compile(r"「[^」]*」|『[^』]*』|“[^”]*”|\"[^\"]*\"")
+
 TYPES = ("콘텐츠 검증", "기본 동작", "예외 사항", "안전")
 TITLE_RE = re.compile(r"^(%s) · (.+?) → (.+)$" % "|".join(TYPES))
 NUM_RE = re.compile(r"^(\d+)\.\s+\S")
@@ -260,6 +270,11 @@ def lint_row(row, cfg):
     if m and not UNFOCUS_RE.search(step or ""):
         warns.append(("Expected", "W3", "테두리·강조를 판정한다 — 누른 직후 포커스 테두리와 헷갈리면 Step 에 「빈 곳을 눌러 포커스를 뺀다」",
                       m.group(0)))
+    exp_bare = QUOTED_ANY_RE.sub("", exp or "")
+    m = EXP_STATE_RE.search(exp_bare)
+    if m and not PRE_STATE_RE.search(pre or ""):
+        warns.append(("Pre", "W4", "Expected 가 개수·상태 표시를 판정하는데 Pre 에 그 상태가 없다 — 앞 행에서 이어 오면 "
+                      "달라진다. 판정에 닿는 속성(선택·완료·잠김 등)을 Pre 에 적는다", m.group(0)))
     if cfg.screen_text is not None:
         for col, cell in (("Expected", exp),):
             for m in QUOTE_RE.finditer(cell or ""):
@@ -418,7 +433,7 @@ CLEAN = [
      "step": "1. [대출하기] 를 누른다.", "exp": "1. 점검 중 안내 화면으로 바뀐다.\n2. 영수증 출력 요청이 이뤄진다."},
     # Comment 의 [확인 필요]·세 경우를 다 적은 조건부 규칙·다른 행 결과에 기대는 조건(참조 낱말 없음)은 허용
     {"id": "C-4", "title": "기본 동작 · 책 줄 누름 → 선택 표시",
-     "pre": "1. 대출 목록 화면 진입 상태\n2. 받침대에 책 두 권을 올린 상태",
+     "pre": "1. 대출 목록 화면 진입 상태\n2. 받침대에 책 두 권을 올렸고 두 줄 모두 ✓ 표시가 없는 상태",
      "step": "1. 첫 번째 책 줄을 누른다.\n2. 목록 아래 빈 곳을 눌러 포커스를 뺀다.",
      "exp": "1. 첫 번째 줄 왼쪽 칸에만 ✓ 표시가 보인다.\n2. 두 줄의 제목 글자가 같은 위치에서 시작한다.",
      "comment": "선택 표시 색은 [확인 필요]. C-1 이 Pass 이면 그대로 수행, Fail 이면 이 행도 Fail, N/T 이면 이 행도 N/T"},
@@ -466,6 +481,15 @@ DIRTY = [
     ("S13", {"pre": "1. 대출 목록 화면 진입 상태", "step": "1. 책을 받침대에 올린다.", "exp": "1. 목록이 보인다.",
              "comment": "C-1 이 Fail 이면 이 행은 반납 화면에서 한다"}),
 ]
+# 경고 규칙 — 종료 코드엔 안 들어가지만 self-test 는 잡히는지 본다(안 잡히면 경고가 죽은 것)
+DIRTY_WARN = [
+    ("W3", {"pre": "1. 대출 목록 화면 진입 상태\n2. 두 줄 모두 ✓ 표시가 없는 상태", "step": "1. 첫 번째 책 줄을 누른다.",
+            "exp": "1. 첫 번째 줄이 테두리로 강조된다."}),
+    # 2회차 시험의 모호 꼴: 개수만 적고 상태(선택 여부)를 안 적었다
+    ("W4", {"pre": "1. 대출 목록 화면 진입 상태\n2. 목록에 책 세 줄이 보이는 상태",
+            "step": "1. 첫 번째 책 줄을 누른다.\n2. 목록 아래 빈 곳을 눌러 포커스를 뺀다.",
+            "exp": "1. 첫 번째 줄 왼쪽 끝에 ✓ 표시가 보인다.\n2. 화면 아래 선택 권수가 1권으로 보인다."}),
+]
 SELFTEST_SCREEN = "대출할 책을 올려 주세요\n연체 도서가 있어 대출할 수 없습니다\n대출하기\n잠금\n해제\n초기화\n재시작\n"
 
 
@@ -479,10 +503,11 @@ def self_test(disabled=()):
     ok = True
     print("[1] 깨끗한 더미 %d행 — 위반 0 이어야 한다" % len(CLEAN))
     for r in CLEAN:
-        issues, _ = lint_row(r, cfg)
-        mark = "통과" if not issues else "실패"
-        print("   %s %s %s" % (mark, r["id"], "" if not issues else issues))
-        ok &= not issues
+        issues, warns = lint_row(r, cfg)
+        bad = issues + warns
+        mark = "통과" if not bad else "실패"
+        print("   %s %s %s" % (mark, r["id"], "" if not bad else bad))
+        ok &= not bad
     print("[2] 일부러 어긴 더미 %d행 — 행마다 그 규칙이 잡혀야 한다" % len(DIRTY))
     for rid, r in DIRTY:
         r = dict(r)
@@ -492,6 +517,17 @@ def self_test(disabled=()):
         got = sorted({i[1] for i in issues})
         hit = rid in got
         print("   %s %-3s 잡힘=%s" % ("통과" if hit else "실패", rid, ",".join(got) or "-"))
+        ok &= hit
+    print("[2b] 일부러 경고를 부른 더미 %d행 — 그 경고가 떠야 한다(종료 코드엔 안 들어감)" % len(DIRTY_WARN))
+    for rid, r in DIRTY_WARN:
+        r = dict(r)
+        r.setdefault("title", "기본 동작 · 책 줄 누름 → 선택 표시")
+        r.setdefault("id", "DW-%s" % rid)
+        issues, warns = lint_row(r, cfg)
+        got = sorted({w[1] for w in warns})
+        hit = rid in got and not issues
+        print("   %s %-3s 경고=%s 위반=%s" % ("통과" if hit else "실패", rid, ",".join(got) or "-",
+                                          ",".join(sorted({i[1] for i in issues})) or "-"))
         ok &= hit
     print("[3] 검사할 행이 0 인 입력은 통과가 아니다(종료 코드 2)")
     import tempfile
